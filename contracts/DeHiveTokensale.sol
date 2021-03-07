@@ -126,8 +126,8 @@ contract DeHiveTokensale is Ownable, Pausable {
     /**
      * @return the amount of the token released.
      */
-    function released(address token) public view returns (uint256) {
-        return _released[token];
+    function released(address investor) public view returns (uint256) {
+        return _released[investor];
     }
 
     /**
