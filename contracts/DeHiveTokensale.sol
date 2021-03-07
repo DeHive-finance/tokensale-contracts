@@ -16,6 +16,8 @@ contract DeHiveTokensale is Ownable, Pausable {
     IERC20 internal constant DAIToken = address(0); //todo set correct address
     IERC20 internal constant NUXToken = address(0); //todo set correct address
 
+    // *** TOKENSALE PARAMETERS START ***
+
     uint256 internal constant PRE_SALE_START = 1615063797; //todo set correct time
     uint256 internal constant PRE_SALE_END = 1615063797; //todo set correct time
 
@@ -28,6 +30,8 @@ contract DeHiveTokensale is Ownable, Pausable {
     uint256 internal constant PRE_SALE_DHV_POOL = 400000 * 10 ** 18; // 20% DHV in presale pool
     uint256 internal constant PUBLIC_SALE_DHV_POOL = 1200000 * 10 ** 18; // 20% DHV in presale pool
     uint256 internal constant NUX_PRESALE_POOL = 100000 * 10 ** 18; // 20% DHV in presale pool
+
+    // *** TOKENSALE PARAMETERS END ***
 
     mapping (address => uint256) investorsBalances;
 
@@ -72,18 +76,22 @@ contract DeHiveTokensale is Ownable, Pausable {
             require(_isPreSale(), "Presale is not active");
             purchaseAmount = ERC20amount.mul(NUXRate);
             require(purchasedWithNUX.add(ERC20amount) <= NUX_PRESALE_POOL, "Not enough DHV in NUX pool");
+            purchasedWithNUX = purchasedWithNUX.add(purchaseAmount);
         }
         if (_isPreSale()) {
             require(purchasedPreSale.add(purchaseAmount) <= PRE_SALE_DHV_POOL, "Not enough DHV in presale pool");
+            purchasedPreSale = purchasedPreSale.add(purchaseAmount);
         } else {
             require(
                 purchasedPublicSale.add(purchaseAmount) <=
                 PUBLIC_SALE_DHV_POOL.add(NUX_PRESALE_POOL.sub(purchasedWithNUX)), // unsold NUX pool goes to public sale
                 "Not enough DHV in presale pool"
             );
+            purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
         }
         IERC20(ERC20token).safeTransferFrom(msg.sender, _treasury, ERC20amount); // send ERC20 to Treasury
         investorsBalances[msg.sender] = investorsBalances[msg.sender].add(purchaseAmount);
+
         emit DHVPurchase(ERC20token, ERC20amount);
     }
 
