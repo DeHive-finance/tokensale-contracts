@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.6;
+pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
@@ -60,7 +60,7 @@ contract DeHiveTokensale is Ownable, Pausable {
     /**
      * @dev Initializes the contract setting the treasury where investments funds go to
      */
-    constructor (address treasury) {
+    constructor (address treasury) public {
         require(treasury != address(0), "0 address");
         _treasury = treasury;
     }
