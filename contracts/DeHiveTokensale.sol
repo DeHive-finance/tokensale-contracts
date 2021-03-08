@@ -79,33 +79,31 @@ contract DeHiveTokensale is Ownable, Pausable {
     function purchaseDHVwithERC20(address ERC20token, uint256 ERC20amount) external onlySale whenNotPaused {
         require(ERC20token == DAIToken || ERC20token == NUXToken, "Not supported token");
         uint256 purchaseAmount;
-        if (ERC20token == DAIToken) {
-            purchaseAmount = ERC20amount.mul(DAIRate);
-        }
-        if (ERC20token == NUXToken) {
+        if (ERC20token == NUXToken) { // NUX Token is allowed only on pre-sale
             require(_isPreSale(), "Presale is not active");
             purchaseAmount = ERC20amount.mul(NUXRate);
             require(purchasedWithNUX.add(ERC20amount) <= NUX_PRESALE_POOL, "Not enough DHV in NUX pool");
             purchasedWithNUX = purchasedWithNUX.add(purchaseAmount);
+        } else if (ERC20token == DAIToken) {
+            purchaseAmount = ERC20amount.mul(DAIRate);
+            if (_isPreSale()) {
+                require(purchasedPreSale.add(purchaseAmount) <= PRE_SALE_DHV_POOL, "Not enough DHV in presale pool");
+                purchasedPreSale = purchasedPreSale.add(purchaseAmount);
+            } else {
+                require(
+                    purchasedPublicSale.add(purchaseAmount) <=
+                    PUBLIC_SALE_DHV_POOL.add(NUX_PRESALE_POOL.sub(purchasedWithNUX)), // unsold NUX pool goes to public sale
+                    "Not enough DHV in presale pool"
+                );
+                purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
+            }
+            IERC20(ERC20token).safeTransferFrom(msg.sender, _treasury, ERC20amount); // send ERC20 to Treasury
+            investorsBalances[msg.sender] = investorsBalances[msg.sender].add(purchaseAmount);
         }
-        if (_isPreSale()) {
-            require(purchasedPreSale.add(purchaseAmount) <= PRE_SALE_DHV_POOL, "Not enough DHV in presale pool");
-            purchasedPreSale = purchasedPreSale.add(purchaseAmount);
-        } else {
-            require(
-                purchasedPublicSale.add(purchaseAmount) <=
-                PUBLIC_SALE_DHV_POOL.add(NUX_PRESALE_POOL.sub(purchasedWithNUX)), // unsold NUX pool goes to public sale
-                "Not enough DHV in presale pool"
-            );
-            purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
-        }
-        IERC20(ERC20token).safeTransferFrom(msg.sender, _treasury, ERC20amount); // send ERC20 to Treasury
-        investorsBalances[msg.sender] = investorsBalances[msg.sender].add(purchaseAmount);
-
         emit DHVPurchase(ERC20token, ERC20amount);
     }
 
-    function purchaseDHVwithETH(uint256 amount, address token) external payable whenNotPaused {
+    function purchaseDHVwithETH(uint256 amount, address token) external payable onlySale whenNotPaused {
         // todo for ethereum purchase after erc20 tests
     }
 
