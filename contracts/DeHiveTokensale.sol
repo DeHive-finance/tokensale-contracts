@@ -12,31 +12,45 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     using SafeMathUpgradeable for uint256;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    address internal constant DHVToken = address(0); //todo set correct address
-    address internal constant DAIToken = address(0); //todo set correct address
-    address internal constant NUXToken = address(0); //todo set correct address
+    /**
+     * EVENTS
+     **/
+    event DHVPurchase(address indexed token, uint256 indexed amount);
+    event TokensReleased(uint256 amount);
+
+    /**
+     * CONSTANTS
+     **/
 
     // *** TOKENSALE PARAMETERS START ***
 
-    uint256 internal constant PRE_SALE_START = 1615063797; //todo set correct time
-    uint256 internal constant PRE_SALE_END = 1615063797; //todo set correct time
+    uint256 public constant PRE_SALE_START = 1616544000;    //Mar 24 2021 00:00:00 GMT
+    uint256 public constant PRE_SALE_END = 1616716800;      //Mar 26 2021 00:00:00 GMT
 
-    uint256 internal constant PUBLIC_SALE_START = 1615063797; //todo set correct time
-    uint256 internal constant PUBLIC_SALE_END = 1615063797; //todo set correct time
+    uint256 public constant PUBLIC_SALE_START = 1618358400; //Apr 14 2021 00:00:00 GMT
+    uint256 public constant PUBLIC_SALE_END = 1618704000;   //Apr 18 2021 00:00:00 GMT
 
-    uint256 internal constant VESTING_START = 1615063797; //todo set correct time
-    uint256 internal constant VESTING_DURATION = 1615063797; //todo set correct time
-
-    uint256 internal constant PRE_SALE_DHV_POOL = 400000 * 10 ** 18; // 20% DHV in presale pool
-    uint256 internal constant PUBLIC_SALE_DHV_POOL = 1200000 * 10 ** 18; // 20% DHV in presale pool
-    uint256 internal constant NUX_PRESALE_POOL = 100000 * 10 ** 18; // 20% DHV in presale pool
+    uint256 internal constant PRE_SALE_DHV_POOL =     400000 * 10 ** 18; // 5% DHV in total in presale pool
+    uint256 internal constant PRE_SALE_DHV_NUX_POOL = 100000 * 10 ** 18; // 
+    uint256 internal constant PUBLIC_SALE_DHV_POOL = 1200000 * 10 ** 18; // 12% DHV in public sale pool
+    
 
     // *** TOKENSALE PARAMETERS END ***
 
+    /***
+     * STORAGE
+     ***/
+
     // *** VESTING PARAMETERS START ***
 
-    uint256 private _start = 1615063797; //todo set correct time
-    uint256 private _duration = 1615063797; //todo set correct time
+    uint256 private _vestingStart = 1625097600;    //Jul 01 2021 00:00:00 GMT
+    uint256 private _vestingDuration = 123 * 24 * 60 * 60; //123 days - until Oct 31 2021 00:00:00 GMT
+
+    address public DHVToken;
+    address internal USDTToken = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    address internal DAIToken = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    address internal NUXToken = 0x89bD2E7e388fAB44AE88BEf4e1AD12b4F1E0911c;
+
 
     mapping (address => uint256) private _released;
 
@@ -54,17 +68,9 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
 
     address private _treasury;
 
-    event DHVPurchase(address indexed token, uint256 indexed amount);
-    event TokensReleased(uint256 amount);
-
-    /**
-     * @notice Initializes the contract setting the treasury where investments funds go to
-     * @param treasury Address of the DeHive protocol's treasury
-     */
-    function initialize(address treasury) virtual public initializer {
-        require(treasury != address(0), "Zero address");
-        _treasury = treasury;
-    }
+    /***
+     * MODIFIERS
+     ***/
 
     /**
     * @dev Throws if called when no ongoing pre-sale or public sale.
@@ -72,6 +78,21 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     modifier onlySale() {
         require(_isPreSale() || _isPublicSale());
         _;
+    }
+
+    /**
+     * INITIALIZER AND SETTINGS
+     **/
+
+    /**
+     * @notice Initializes the contract with correct addresses settings
+     * @param treasury Address of the DeHive protocol's treasury where investments funds go to
+     * @param dhv DHVToken mainnet address
+     */
+    function initialize(address treasury, address dhv) virtual public initializer {
+        require(treasury != address(0), "Zero address");
+        _treasury = treasury;
+        DHVToken = dhv;
     }
 
     /**
@@ -83,7 +104,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         if (ERC20token == NUXToken) { // NUX Token is allowed only on pre-sale
             require(_isPreSale(), "Presale is not active");
             purchaseAmount = ERC20amount.mul(NUXRate);
-            require(purchasedWithNUX.add(ERC20amount) <= NUX_PRESALE_POOL, "Not enough DHV in NUX pool");
+            require(purchasedWithNUX.add(ERC20amount) <= PRE_SALE_DHV_NUX_POOL, "Not enough DHV in NUX pool");
             purchasedWithNUX = purchasedWithNUX.add(purchaseAmount);
         } else if (ERC20token == DAIToken) {
             purchaseAmount = ERC20amount.mul(DAIRate);
@@ -93,7 +114,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
             } else {
                 require(
                     purchasedPublicSale.add(purchaseAmount) <=
-                    PUBLIC_SALE_DHV_POOL.add(NUX_PRESALE_POOL.sub(purchasedWithNUX)), // unsold NUX pool goes to public sale
+                    PUBLIC_SALE_DHV_POOL.add(PRE_SALE_DHV_NUX_POOL.sub(purchasedWithNUX)), // unsold NUX pool goes to public sale
                     "Not enough DHV in presale pool"
                 );
                 purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
@@ -112,14 +133,14 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @return the start time of the token vesting.
      */
     function start() public view returns (uint256) {
-        return _start;
+        return _vestingStart;
     }
 
     /**
      * @return the duration of the token vesting.
      */
     function duration() public view returns (uint256) {
-        return _duration;
+        return _vestingDuration;
     }
 
     /**
@@ -153,10 +174,10 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @param investorAddress address for token release
      */
     function _vestedAmount(address investorAddress) private view returns (uint256) {
-        if (block.timestamp >= _start.add(_duration)) {
+        if (block.timestamp >= _vestingStart.add(_vestingDuration)) {
             return investorsBalances[investorAddress];
         } else {
-            return investorsBalances[investorAddress].mul(block.timestamp.sub(_start)).div(_duration);
+            return investorsBalances[investorAddress].mul(block.timestamp.sub(_vestingStart)).div(_vestingDuration);
         }
     }
 
