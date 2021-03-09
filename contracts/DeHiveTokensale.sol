@@ -2,15 +2,15 @@
 
 pragma solidity ^0.6.12;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
-contract DeHiveTokensale is Ownable, Pausable {
+contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
 
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+    using SafeMathUpgradeable for uint256;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     address internal constant DHVToken = address(0); //todo set correct address
     address internal constant DAIToken = address(0); //todo set correct address
@@ -58,10 +58,11 @@ contract DeHiveTokensale is Ownable, Pausable {
     event TokensReleased(uint256 amount);
 
     /**
-     * @dev Initializes the contract setting the treasury where investments funds go to
+     * @notice Initializes the contract setting the treasury where investments funds go to
+     * @param treasury Address of the DeHive protocol's treasury
      */
-    constructor (address treasury) public {
-        require(treasury != address(0), "0 address");
+    function initialize(address treasury) virtual public initializer {
+        require(treasury != address(0), "Zero address");
         _treasury = treasury;
     }
 
@@ -97,8 +98,8 @@ contract DeHiveTokensale is Ownable, Pausable {
                 );
                 purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
             }
-            IERC20(ERC20token).safeTransferFrom(msg.sender, _treasury, ERC20amount); // send ERC20 to Treasury
-            investorsBalances[msg.sender] = investorsBalances[msg.sender].add(purchaseAmount);
+            IERC20Upgradeable(ERC20token).safeTransferFrom(_msgSender(), _treasury, ERC20amount); // send ERC20 to Treasury
+            investorsBalances[_msgSender()] = investorsBalances[_msgSender()].add(purchaseAmount);
         }
         emit DHVPurchase(ERC20token, ERC20amount);
     }
@@ -132,10 +133,10 @@ contract DeHiveTokensale is Ownable, Pausable {
      * @notice Transfers vested tokens to investor.
      */
     function release() public {
-        uint256 unreleased = _releasableAmount(msg.sender);
+        uint256 unreleased = _releasableAmount(_msgSender());
         require(unreleased > 0, "TokenVesting: no tokens are due");
-        _released[msg.sender] = _released[msg.sender].add(unreleased);
-        IERC20(DHVToken).safeTransfer(msg.sender, unreleased);
+        _released[_msgSender()] = _released[_msgSender()].add(unreleased);
+        IERC20Upgradeable(DHVToken).safeTransfer(_msgSender(), unreleased);
         emit TokensReleased(unreleased);
     }
 
@@ -174,7 +175,7 @@ contract DeHiveTokensale is Ownable, Pausable {
      */
     function adminWithdrawERC20(address ERC20token, uint256 ERC20amount) external onlyOwner {
         require(ERC20token != DHVToken, "DHV withdrawal is forbidden");
-        IERC20(ERC20token).safeTransfer(msg.sender, ERC20amount);
+        IERC20Upgradeable(ERC20token).safeTransfer(_msgSender(), ERC20amount);
     }
 
     /**
@@ -182,7 +183,7 @@ contract DeHiveTokensale is Ownable, Pausable {
      */
     function adminWithdraw(address ERC20token, uint256 ERC20amount) external onlyOwner {
         require(ERC20token != DHVToken, "DHV withdrawal is forbidden");
-        msg.sender.transfer(address(this).balance);
+        _msgSender().transfer(address(this).balance);
     }
 
     /**
