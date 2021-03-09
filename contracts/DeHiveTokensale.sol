@@ -7,6 +7,12 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
+// TODO leave funds on the contract until withdraw by the owner
+// TODO Change events parameters
+// TODO correct rate calculation (including NUX)
+// TODO Correct rate setting up
+// TODO NUX token withdraw
+// TODO ETH withdraw
 contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
 
     using SafeMathUpgradeable for uint256;
@@ -15,7 +21,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     /**
      * EVENTS
      **/
-    event DHVPurchase(address indexed token, uint256 indexed amount);
+    event DHVPurchased(address indexed user, address indexed purchaseToken, uint256 dhvAmount);
     event TokensReleased(uint256 amount);
 
     /**
@@ -30,9 +36,9 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     uint256 public constant PUBLIC_SALE_START = 1618358400; //Apr 14 2021 00:00:00 GMT
     uint256 public constant PUBLIC_SALE_END = 1618704000;   //Apr 18 2021 00:00:00 GMT
 
-    uint256 internal constant PRE_SALE_DHV_POOL =     400000 * 10 ** 18; // 5% DHV in total in presale pool
-    uint256 internal constant PRE_SALE_DHV_NUX_POOL = 100000 * 10 ** 18; // 
-    uint256 internal constant PUBLIC_SALE_DHV_POOL = 1200000 * 10 ** 18; // 12% DHV in public sale pool
+    uint256 public constant PRE_SALE_DHV_POOL =     400000 * 10 ** 18; // 5% DHV in total in presale pool
+    uint256 public constant PRE_SALE_DHV_NUX_POOL = 100000 * 10 ** 18; // 
+    uint256 public constant PUBLIC_SALE_DHV_POOL = 1200000 * 10 ** 18; // 12% DHV in public sale pool
     
 
     // *** TOKENSALE PARAMETERS END ***
@@ -43,18 +49,17 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
 
     // *** VESTING PARAMETERS START ***
 
-    uint256 private _vestingStart = 1625097600;    //Jul 01 2021 00:00:00 GMT
-    uint256 private _vestingDuration = 123 * 24 * 60 * 60; //123 days - until Oct 31 2021 00:00:00 GMT
+    uint256 public vestingStart = 1625097600;    //Jul 01 2021 00:00:00 GMT
+    uint256 public vestingDuration = 123 * 24 * 60 * 60; //123 days - until Oct 31 2021 00:00:00 GMT
+
+    mapping (address => uint256) private _released;
+
+    // *** VESTING PARAMETERS END ***
 
     address public DHVToken;
     address internal USDTToken = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     address internal DAIToken = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address internal NUXToken = 0x89bD2E7e388fAB44AE88BEf4e1AD12b4F1E0911c;
-
-
-    mapping (address => uint256) private _released;
-
-    // *** VESTING PARAMETERS START ***
 
     mapping (address => uint256) investorsBalances;
 
@@ -63,6 +68,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     uint256 public purchasedPublicSale = 0;
 
     uint256 public ETHRate;
+    uint256 public USDTRate;
     uint256 public DAIRate;
     uint256 public NUXRate;
 
@@ -73,16 +79,32 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      ***/
 
     /**
-    * @dev Throws if called when no ongoing pre-sale or public sale.
-    */
-    modifier onlySale() {
-        require(_isPreSale() || _isPublicSale());
+     * @dev Throws if called with not supported token.
+     */
+    modifier supportedCoin(address _token) {
+        require(_token == USDTToken || _token == DAIToken, "Token not supported");
         _;
     }
 
     /**
+    * @dev Throws if called when no ongoing pre-sale or public sale.
+    */
+    modifier onlySale() {
+        require(_isPreSale() || _isPublicSale(), "Sale stages are over");
+        _;
+    }
+
+    /**
+    * @dev Throws if called when no ongoing pre-sale or public sale.
+    */
+    modifier onlyPreSale() {
+        require(_isPreSale(), "Presale stages are over");
+        _;
+    }
+
+    /***
      * INITIALIZER AND SETTINGS
-     **/
+     ***/
 
     /**
      * @notice Initializes the contract with correct addresses settings
@@ -91,57 +113,99 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      */
     function initialize(address treasury, address dhv) virtual public initializer {
         require(treasury != address(0), "Zero address");
+        require(dhv != address(0), "Zero address");
+
+        __Ownable_init();
+        __Pausable_init();
+
         _treasury = treasury;
         DHVToken = dhv;
     }
 
+
+    /***
+     * PURCHASE FUNCTIONS
+     ***/
+
     /**
-     * @dev
+     * @notice For default ETH receiving
      */
-    function purchaseDHVwithERC20(address ERC20token, uint256 ERC20amount) external onlySale whenNotPaused {
-        require(ERC20token == DAIToken || ERC20token == NUXToken, "Not supported token");
-        uint256 purchaseAmount;
-        if (ERC20token == NUXToken) { // NUX Token is allowed only on pre-sale
-            require(_isPreSale(), "Presale is not active");
-            purchaseAmount = ERC20amount.mul(NUXRate);
-            require(purchasedWithNUX.add(ERC20amount) <= PRE_SALE_DHV_NUX_POOL, "Not enough DHV in NUX pool");
-            purchasedWithNUX = purchasedWithNUX.add(purchaseAmount);
-        } else if (ERC20token == DAIToken) {
-            purchaseAmount = ERC20amount.mul(DAIRate);
-            if (_isPreSale()) {
-                require(purchasedPreSale.add(purchaseAmount) <= PRE_SALE_DHV_POOL, "Not enough DHV in presale pool");
-                purchasedPreSale = purchasedPreSale.add(purchaseAmount);
-            } else {
-                require(
-                    purchasedPublicSale.add(purchaseAmount) <=
-                    PUBLIC_SALE_DHV_POOL.add(PRE_SALE_DHV_NUX_POOL.sub(purchasedWithNUX)), // unsold NUX pool goes to public sale
-                    "Not enough DHV in presale pool"
-                );
-                purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
-            }
-            IERC20Upgradeable(ERC20token).safeTransferFrom(_msgSender(), _treasury, ERC20amount); // send ERC20 to Treasury
-            investorsBalances[_msgSender()] = investorsBalances[_msgSender()].add(purchaseAmount);
+    receive() external virtual payable {
+    }
+
+    /**
+     * @notice For purchase with allowed stablecoin (USDT and DAI)
+     * @param ERC20token Address of the token to be paid in
+     * @param ERC20amount Amount of the token to be paid in
+     */
+    function purchaseDHVwithERC20(address ERC20token, uint256 ERC20amount) external onlySale supportedCoin(ERC20token) whenNotPaused {
+        uint256 purchaseAmount = _calcPurchaseAmount(ERC20token, ERC20amount);
+        
+        if (_isPreSale()) {
+            require(purchasedPreSale.add(purchaseAmount) <= PRE_SALE_DHV_POOL, "Not enough DHV in presale pool");
+            purchasedPreSale = purchasedPreSale.add(purchaseAmount);
+        } else {
+            require(purchaseAmount <= publicSaleAvailableDHV(), "Not enough DHV in sale pool");
+            purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
         }
-        emit DHVPurchase(ERC20token, ERC20amount);
-    }
+            
+        IERC20Upgradeable(ERC20token).safeTransferFrom(_msgSender(), _treasury, ERC20amount); // send ERC20 to Treasury
+        investorsBalances[_msgSender()] = investorsBalances[_msgSender()].add(purchaseAmount);
 
-    function purchaseDHVwithETH(uint256 amount, address token) external payable onlySale whenNotPaused {
-        // todo for ethereum purchase after erc20 tests
-    }
-
-    /**
-     * @return the start time of the token vesting.
-     */
-    function start() public view returns (uint256) {
-        return _vestingStart;
+        emit DHVPurchased(_msgSender(), ERC20token, purchaseAmount);
     }
 
     /**
-     * @return the duration of the token vesting.
+     * @notice For purchase with NUX token only. Available only for tokensale
+     * @param nuxAmount Amount of the NUX token
      */
-    function duration() public view returns (uint256) {
-        return _vestingDuration;
+    function purchaseDHVwithNUX(uint256 nuxAmount) external onlyPreSale whenNotPaused {
+        uint256 purchaseAmount = _calcPurchaseAmount(NUXToken, nuxAmount);
+
+        require(purchasedWithNUX.add(purchaseAmount) <= PRE_SALE_DHV_NUX_POOL, "Not enough DHV in NUX pool");
+        purchasedWithNUX = purchasedWithNUX.add(purchaseAmount);
+
+        IERC20Upgradeable(NUXToken).safeTransferFrom(_msgSender(), _treasury, nuxAmount);
+        investorsBalances[_msgSender()] = investorsBalances[_msgSender()].add(purchaseAmount);
+
+        emit DHVPurchased(_msgSender(), NUXToken, purchaseAmount);
     }
+
+    /**
+     * @notice For purchase with ETH. ETH is left on the contract until withdrawn to treasury
+     */
+    function purchaseDHVwithETH() external payable onlySale whenNotPaused {
+        require(msg.value > 0, "No ETH sent");
+        uint256 purchaseAmount = _calcEthPurchaseAmount(msg.value);
+
+        if (_isPreSale()) {
+            require(purchasedPreSale.add(purchaseAmount) <= PRE_SALE_DHV_POOL, "Not enough DHV in presale pool");
+            purchasedPreSale = purchasedPreSale.add(purchaseAmount);
+        } else {
+            require(purchaseAmount <= publicSaleAvailableDHV(), "Not enough DHV in sale pool");
+            purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
+        }
+
+        investorsBalances[_msgSender()] = investorsBalances[_msgSender()].add(purchaseAmount);
+
+        emit DHVPurchased(_msgSender(), address(0), purchaseAmount);
+    }
+
+    /**
+     * @notice Function to get available on public sale amount of DHV
+     * @notice Unsold NUX pool and pre-sale pool go to public sale
+     * @return The amount of the token released.
+     */
+    function publicSaleAvailableDHV() public view returns(uint256) {
+        return PUBLIC_SALE_DHV_POOL.sub(purchasedPublicSale) +
+               PRE_SALE_DHV_POOL.sub(purchasedPreSale) +
+               PRE_SALE_DHV_NUX_POOL.sub(purchasedWithNUX);
+    }
+
+
+    /***
+     * VIEW INTERFACE
+     ***/
 
     /**
      * @return the amount of the token released.
@@ -174,20 +238,20 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @param investorAddress address for token release
      */
     function _vestedAmount(address investorAddress) private view returns (uint256) {
-        if (block.timestamp >= _vestingStart.add(_vestingDuration)) {
+        if (block.timestamp >= vestingStart.add(vestingDuration)) {
             return investorsBalances[investorAddress];
         } else {
-            return investorsBalances[investorAddress].mul(block.timestamp.sub(_vestingStart)).div(_vestingDuration);
+            return investorsBalances[investorAddress].mul(block.timestamp.sub(vestingStart)).div(vestingDuration);
         }
     }
 
     /**
      * @dev Sets the rates for all currencies allowed for purchases. The rate is based on smallest fraction
      */
-    function adminSetRates(uint256 ethRate, uint256 daiRate, uint256 nuxRate) external onlyOwner {
-        ETHRate = ethRate;
-        DAIRate = daiRate;
-        NUXRate = nuxRate;
+    function adminSetRates(uint256 _ethRate, uint256 _daiRate, uint256 _nuxRate) external onlyOwner {
+        ETHRate = _ethRate;
+        DAIRate = _daiRate;
+        NUXRate = _nuxRate;
     }
 
     /**
@@ -220,5 +284,13 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
 
     function _isPublicSale() private returns (bool) {
         return (block.timestamp >= PUBLIC_SALE_START && block.timestamp < PUBLIC_SALE_END);
+    }
+
+    function _calcPurchaseAmount(address _token, uint256 _amount) private view returns (uint256) {
+        return _amount * DAIRate; //todo correct the calculation
+    }
+
+    function _calcEthPurchaseAmount(uint256 _amount) private view returns (uint256) {
+        return _amount * DAIRate; //todo correct the calculation
     }
 }
