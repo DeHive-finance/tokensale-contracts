@@ -23,7 +23,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      **/
 
     // *** TOKENSALE PARAMETERS START ***
-    uint256 public PRECISION = 100000; //Up to 0.00001
+    uint256 public constant PRECISION = 100000; //Up to 0.00001
     uint256 public constant PRE_SALE_START = 1616544000;    //Mar 24 2021 00:00:00 GMT
     uint256 public constant PRE_SALE_END = 1616716800;      //Mar 26 2021 00:00:00 GMT
 
@@ -42,24 +42,24 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
 
     // *** VESTING PARAMETERS START ***
 
-    uint256 public vestingStart = 1625097600;    //Jul 01 2021 00:00:00 GMT
-    uint256 public vestingDuration = 123 * 24 * 60 * 60; //123 days - until Oct 31 2021 00:00:00 GMT
+    uint256 public vestingStart /*= 1625097600*/;    //Jul 01 2021 00:00:00 GMT
+    uint256 public vestingDuration /*= 123 * 24 * 60 * 60*/; //123 days - until Oct 31 2021 00:00:00 GMT
     
     // *** VESTING PARAMETERS END ***
     address public DHVToken;
-    address internal USDTToken = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
-    address internal DAIToken = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address internal NUXToken = 0x89bD2E7e388fAB44AE88BEf4e1AD12b4F1E0911c;
+    address internal USDTToken /*= 0xdAC17F958D2ee523a2206206994597C13D831ec7 */;
+    address internal DAIToken /*= 0x6B175474E89094C44Da98b954EedeAC495271d0F*/;
+    address internal NUXToken /*= 0x89bD2E7e388fAB44AE88BEf4e1AD12b4F1E0911c*/;
 
     mapping (address => uint256) public purchased;
     mapping (address => uint256) internal _claimed;
 
-    uint256 public purchasedWithNUX = 0;
-    uint256 public purchasedPreSale = 0;
-    uint256 public purchasedPublicSale = 0;
+    uint256 public purchasedWithNUX /*= 0*/;
+    uint256 public purchasedPreSale /*= 0*/;
+    uint256 public purchasedPublicSale /*= 0*/;
 
     uint256 public ETHRate;
-    mapping (address => uint256) rates;
+    mapping (address => uint256) public rates;
 
     address private _treasury;
 
@@ -109,7 +109,16 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @param treasury Address of the DeHive protocol's treasury where funds from sale go to
      * @param dhv DHVToken mainnet address
      */
-    function initialize(address treasury, address dhv) virtual public initializer {
+    function initialize(address _DAIToken,
+        address _USDTToken,
+        address _NUXToken,
+        address treasury,
+        uint _vestingStart,
+        uint _vestingDuration,
+        uint _purchasedWithNUX,
+        uint _purchasedPreSale,
+        uint _purchasedPublicSale,
+        address dhv) virtual public initializer {
         require(treasury != address(0), "Zero address");
         require(dhv != address(0), "Zero address");
 
@@ -118,6 +127,15 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
 
         _treasury = treasury;
         DHVToken = dhv;
+
+        DAIToken = _DAIToken;
+        USDTToken = _USDTToken;
+        NUXToken = _NUXToken;
+        vestingStart = _vestingStart;
+        vestingDuration = _vestingDuration;
+        purchasedWithNUX = _purchasedWithNUX;
+        purchasedPreSale = _purchasedPreSale;
+        purchasedPublicSale = _purchasedPublicSale;
     }
 
 
