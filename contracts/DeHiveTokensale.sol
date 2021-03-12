@@ -30,9 +30,9 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     uint256 public constant PUBLIC_SALE_START = 1618358400; //Apr 14 2021 00:00:00 GMT
     uint256 public constant PUBLIC_SALE_END = 1618704000;   //Apr 18 2021 00:00:00 GMT
 
-    uint256 public constant PRE_SALE_DHV_POOL =     450000 * 10 ** 18; // 5% DHV in total in presale pool
-    uint256 public constant PRE_SALE_DHV_NUX_POOL =  50000 * 10 ** 18; // 
-    uint256 public constant PUBLIC_SALE_DHV_POOL = 1200000 * 10 ** 18; // 12% DHV in public sale pool
+    uint256 public constant PRE_SALE_DHV_POOL =     45/*0000*/ * 10 ** 18; // 5% DHV in total in presale pool
+    uint256 public constant PRE_SALE_DHV_NUX_POOL =  5/*0000*/ * 10 ** 18; // 
+    uint256 public constant PUBLIC_SALE_DHV_POOL = 120/*0000*/ * 10 ** 18; // 12% DHV in public sale pool
     // *** TOKENSALE PARAMETERS END ***
 
 
@@ -201,7 +201,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
             purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
         }
             
-        IERC20Upgradeable(ERC20token).safeTransferFrom(_msgSender(), address(this), ERC20amount); // send ERC20 to Treasury
+        IERC20Upgradeable(ERC20token).safeTransferFrom(_msgSender(), _treasury, ERC20amount); // send ERC20 to Treasury
         purchased[_msgSender()] = purchased[_msgSender()].add(purchaseAmount);
 
         emit DHVPurchased(_msgSender(), ERC20token, purchaseAmount);
@@ -219,7 +219,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         require(purchasedWithNUX.add(purchaseAmount) <= PRE_SALE_DHV_NUX_POOL, "Not enough DHV in NUX pool");
         purchasedWithNUX = purchasedWithNUX.add(purchaseAmount);
 
-        IERC20Upgradeable(NUXToken).safeTransferFrom(_msgSender(), address(this), nuxAmount);
+        IERC20Upgradeable(NUXToken).safeTransferFrom(_msgSender(), _treasury, nuxAmount);
         purchased[_msgSender()] = purchased[_msgSender()].add(purchaseAmount);
 
         emit DHVPurchased(_msgSender(), NUXToken, purchaseAmount);
@@ -242,6 +242,8 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         }
 
         purchased[_msgSender()] = purchased[_msgSender()].add(purchaseAmount);
+
+        payable(_treasury).transfer(msg.value);
 
         emit DHVPurchased(_msgSender(), address(0), purchaseAmount);
     }

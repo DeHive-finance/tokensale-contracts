@@ -11,9 +11,9 @@ address private _treasury;
     // uint256 public constant PUBLIC_SALE_START = now + 10 days; //Apr 14 2021 00:00:00 GMT
     // uint256 public constant PUBLIC_SALE_END = now + 15 days;
 
-    uint256 virtual override public constant PRE_SALE_DHV_POOL =    20; 
-    uint256 virtual override public constant PRE_SALE_DHV_NUX_POOL = 20;  
-    uint256 virtual override public constant PUBLIC_SALE_DHV_POOL =  20;
+    // uint256  override public constant PRE_SALE_DHV_POOL =    20; 
+    // uint256  override public constant PRE_SALE_DHV_NUX_POOL = 20;  
+    // uint256  override public constant PUBLIC_SALE_DHV_POOL =  20;
 
     function initialize(address _DAIToken,
         address _USDTToken,
