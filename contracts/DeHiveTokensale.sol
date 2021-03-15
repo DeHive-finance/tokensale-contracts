@@ -30,9 +30,9 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     uint256 public constant PUBLIC_SALE_START = 1618358400; //Apr 14 2021 00:00:00 GMT
     uint256 public constant PUBLIC_SALE_END = 1618704000;   //Apr 18 2021 00:00:00 GMT
 
-    uint256 public constant PRE_SALE_DHV_POOL =     45/*0000*/ * 10 ** 18; // 5% DHV in total in presale pool
-    uint256 public constant PRE_SALE_DHV_NUX_POOL =  5/*0000*/ * 10 ** 18; // 
-    uint256 public constant PUBLIC_SALE_DHV_POOL = 120/*0000*/ * 10 ** 18; // 12% DHV in public sale pool
+    uint256 public constant PRE_SALE_DHV_POOL =     450000 * 10 ** 18; // 5% DHV in total in presale pool
+    uint256 public constant PRE_SALE_DHV_NUX_POOL =  50000 * 10 ** 18; // 
+    uint256 public constant PUBLIC_SALE_DHV_POOL = 1200000 * 10 ** 18; // 12% DHV in public sale pool
     // *** TOKENSALE PARAMETERS END ***
 
 
@@ -42,21 +42,22 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
 
     // *** VESTING PARAMETERS START ***
 
-    uint256 public vestingStart /*= 1625097600*/;    //Jul 01 2021 00:00:00 GMT
-    uint256 public vestingDuration /*= 123 * 24 * 60 * 60*/; //123 days - until Oct 31 2021 00:00:00 GMT
+    uint256 public vestingStart;  //Jul 01 2021 00:00:00 GMT
+    uint256 public vestingDuration; //123 days - until Oct 31 2021 00:00:00 GMT
     
     // *** VESTING PARAMETERS END ***
     address public DHVToken;
-    address internal USDTToken /*= 0xdAC17F958D2ee523a2206206994597C13D831ec7 */;
-    address internal DAIToken /*= 0x6B175474E89094C44Da98b954EedeAC495271d0F*/;
-    address internal NUXToken /*= 0x89bD2E7e388fAB44AE88BEf4e1AD12b4F1E0911c*/;
+    address internal USDTToken;
+    address internal DAIToken;
+    address internal NUXToken;
+    //test token
 
     mapping (address => uint256) public purchased;
     mapping (address => uint256) internal _claimed;
 
-    uint256 public purchasedWithNUX /*= 0*/;
-    uint256 public purchasedPreSale /*= 0*/;
-    uint256 public purchasedPublicSale /*= 0*/;
+    uint256 public purchasedWithNUX;
+    uint256 public purchasedPreSale;
+    uint256 public purchasedPublicSale;
 
     uint256 public ETHRate;
     mapping (address => uint256) public rates;
@@ -109,33 +110,26 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @param treasury Address of the DeHive protocol's treasury where funds from sale go to
      * @param dhv DHVToken mainnet address
      */
-    function initialize(address _DAIToken,
-        address _USDTToken,
-        address _NUXToken,
-        address treasury,
-        uint _vestingStart,
-        uint _vestingDuration,
-        uint _purchasedWithNUX,
-        uint _purchasedPreSale,
-        uint _purchasedPublicSale,
-        address dhv) virtual public initializer {
+    function initialize(address treasury, address dhv, address usdt, address dai, address nux) virtual public initializer {
         require(treasury != address(0), "Zero address");
         require(dhv != address(0), "Zero address");
 
         __Ownable_init();
         __Pausable_init();
 
+        vestingStart = 1625097600;
+        vestingDuration = 123 * 24 * 60 * 60;
+
+        USDTToken = usdt;
+        DAIToken = dai;
+        NUXToken = nux;
+
+        purchasedWithNUX=0;
+        purchasedPreSale=0;
+        purchasedPublicSale=0;
+
         _treasury = treasury;
         DHVToken = dhv;
-
-        DAIToken = _DAIToken;
-        USDTToken = _USDTToken;
-        NUXToken = _NUXToken;
-        vestingStart = _vestingStart;
-        vestingDuration = _vestingDuration;
-        purchasedWithNUX = _purchasedWithNUX;
-        purchasedPreSale = _purchasedPreSale;
-        purchasedPublicSale = _purchasedPublicSale;
     }
 
 
@@ -144,6 +138,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @param _token ERC20 token address or zero address for ETH
      * @param _rate Exchange rate based on precision (e.g. _rate = PRECISION corresponds to 1:1)
      */
+     //1
     function adminSetRates(address _token, uint256 _rate) external onlyOwner {
         if (_token == address(0))
             ETHRate = _rate;
@@ -244,7 +239,6 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         purchased[_msgSender()] = purchased[_msgSender()].add(purchaseAmount);
 
         payable(_treasury).transfer(msg.value);
-
         emit DHVPurchased(_msgSender(), address(0), purchaseAmount);
     }
 
@@ -265,10 +259,11 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @notice Withdrawals allowed only if there is no sale pending stage
      * @param ERC20token Address of ERC20 token to withdraw from the contract
      */
+     //2
     function adminWithdrawERC20(address ERC20token) external onlyOwner notOnSale {
         require(ERC20token != DHVToken, "DHV withdrawal is forbidden");
 
-        uint256 tokenBalance = IERC20Upgradeable(USDTToken).balanceOf(address(this));
+        uint256 tokenBalance = IERC20Upgradeable(ERC20token).balanceOf(address(this));
         IERC20Upgradeable(ERC20token).safeTransfer(_treasury, tokenBalance);
     }
 
