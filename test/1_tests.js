@@ -35,14 +35,9 @@ const DHVToken = artifacts.require('DHVToken');
 const unsupportedToken = '0xc944e90c64b2c07662a292be6244bdf05cda44a7';
 
 const addressZero = '0x0000000000000000000000000000000000000000';
-<<<<<<< HEAD
 const PRE_SALE_START = 1616544000;
 const PRE_SALE_END = 1616716800;
 
-=======
-
-const PRE_SALE_END = 1616716800;
->>>>>>> 0e488ce (Completed deposite ic erc20 test coverage, added test coverate for deposite in eth and nux)
 const PUBLIC_SALE_START = 1618358400;
 const PUBLIC_SALE_END = 1618704000;
 
@@ -127,12 +122,9 @@ describe('Purchase DHV test coverage', () => {
         });
 
         it('Should not let deposit with unsupported token', async () => {
-<<<<<<< HEAD
+            await timeMachine.advanceTime(36*86400);
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
-=======
-            await timeMachine.advanceTime(36*86400);
->>>>>>> 0e488ce (Completed deposite ic erc20 test coverage, added test coverate for deposite in eth and nux)
 
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
@@ -230,15 +222,9 @@ describe('Purchase DHV test coverage', () => {
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
             
-<<<<<<< HEAD
            // Advance time to pre-sale stage
            await timeMachine.advanceTimeAndBlock(
             PRE_SALE_START - time + 86400);
-=======
-            // Advance time to presale stage
-            await timeMachine.advanceTime(
-                    PRE_SALE_END - time - 40000);
->>>>>>> 0e488ce (Completed deposite ic erc20 test coverage, added test coverate for deposite in eth and nux)
             
             // Buy all tokens from presale pool
             await testToken.approve(
@@ -246,7 +232,6 @@ describe('Purchase DHV test coverage', () => {
                 BigInt('45000000000000000000'),
                 {from: deployer}
                 );
-<<<<<<< HEAD
             await deHiveTokensale.purchaseDHVwithERC20(
                 testTokenAddress,
                 BigInt('45000000000000000000'),
@@ -278,35 +263,6 @@ describe('Purchase DHV test coverage', () => {
                     );
             await deHiveTokensale.purchaseDHVwithERC20(
                 testTokenAddress,
-=======
-            await deHiveTokensale.purchaseDHVwithERC20(
-                testTokenAddress,
-                BigInt('45000000000000000000'),
-                {from: deployer}
-            )
-            // Buy all token from nux presale pool
-            await testToken.approve(
-                deHiveTokensale.address,
-                BigInt('5000000000000000000'),
-                {from: deployer}
-                );
-            await deHiveTokensale.purchaseDHVwithNUX(
-                BigInt('5000000000000000000'),
-                {from: deployer}
-            );
-
-            // Advance time to public sale
-            await timeMachine.advanceTime(21*86400); // Get April 15
-
-            // Buy all tokens from public pool
-            await testToken.approve(
-                    deHiveTokensale.address,
-                     BigInt('120001000000000000000'),
-                    {from: deployer}
-                    );
-            await deHiveTokensale.purchaseDHVwithERC20(
-                testTokenAddress,
->>>>>>> 0e488ce (Completed deposite ic erc20 test coverage, added test coverate for deposite in eth and nux)
                  BigInt('120000000000000000000'),
                 {from: deployer}
                 );
@@ -341,21 +297,6 @@ describe('Purchase DHV test coverage', () => {
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
             
-<<<<<<< HEAD
-            let balanceBeforeBuying = await web3.eth.getBalance(user2);
-            balanceBeforeBuying = await web3.utils.fromWei(
-                await balanceBeforeBuying.toString(),
-                'ether'
-            );
-
-            let treasuryBalance = await web3.eth.getBalance(treasury);
-             treasuryBalance = await web3.utils.fromWei(
-                await treasuryBalance.toString(),
-                'ether'
-            );
-
-=======
->>>>>>> 0e488ce (Completed deposite ic erc20 test coverage, added test coverate for deposite in eth and nux)
             await deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
                      value: await web3.utils.toWei('1', 'ether')  
@@ -368,7 +309,6 @@ describe('Purchase DHV test coverage', () => {
                 expect(
                     await web3.utils.fromWei((await deHiveTokensale.purchasedPreSale())
                     .toString(), 'ether'))
-<<<<<<< HEAD
                     .to.equal('1');  
 
             let current_balance = await web3.eth.getBalance(user2);
@@ -386,31 +326,6 @@ describe('Purchase DHV test coverage', () => {
             );
             expect(Number(current_balance))
                 .to.equal(Number(treasuryBalance) + 1);
-=======
-                    .to.equal('1');        
-            
-            expect(
-                Number.parseInt(await web3.utils.fromWei(
-                    (await web3.eth.getBalance(user2)).toString(),
-                    'ether')))
-                    .to.be.lessThan(99);
-
-            expect(
-                await web3.utils.fromWei(
-                    (await web3.eth.getBalance(treasury)).toString(),
-                    'ether'))
-                    .to.equal('101');
->>>>>>> 0e488ce (Completed deposite ic erc20 test coverage, added test coverate for deposite in eth and nux)
-        });
-
-        it('Should buy tokens with eth in public sale', async () => {
-            await deHiveTokensale.adminSetRates(
-                addressZero, 100000, {from: deployer});
-
-            await timeMachine.advanceTime(
-                PUBLIC_SALE_START - time + 86400); // Get April 15
-            
-<<<<<<< HEAD
             let balanceBeforeBuying = await web3.eth.getBalance(user2);
             balanceBeforeBuying = await web3.utils.fromWei(
                 await balanceBeforeBuying.toString(),
@@ -423,8 +338,6 @@ describe('Purchase DHV test coverage', () => {
                 'ether'
             );
 
-=======
->>>>>>> 0e488ce (Completed deposite ic erc20 test coverage, added test coverate for deposite in eth and nux)
             await deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
                      value: await web3.utils.toWei('1', 'ether')  
@@ -437,7 +350,6 @@ describe('Purchase DHV test coverage', () => {
                      await web3.utils.fromWei((await deHiveTokensale.purchasedPublicSale())
                         .toString(), 'ether'))
                         .to.equal('1');        
-<<<<<<< HEAD
             
             let current_balance = await web3.eth.getBalance(user2);
             current_balance = await(web3.utils.fromWei(
@@ -454,20 +366,7 @@ describe('Purchase DHV test coverage', () => {
                 );
              expect(Number(current_balance))
                     .to.equal(Number(treasuryBalance) + 1);
-=======
-                    
-            expect(
-                 Number.parseInt(await web3.utils.fromWei(
-                        (await web3.eth.getBalance(user2)).toString(),
-                        'ether')))
-                        .to.be.lessThan(99);
         
-             expect(
-                    await web3.utils.fromWei(
-                        (await web3.eth.getBalance(treasury)).toString(),
-                        'ether'))
-                        .to.equal('101');
->>>>>>> 0e488ce (Completed deposite ic erc20 test coverage, added test coverate for deposite in eth and nux)
         });
 
         it('Should sell tokens only during sale stages', async () => {
@@ -542,14 +441,9 @@ describe('Purchase DHV test coverage', () => {
         it('Cant buy tokens during presale if presale pool is empty', async () => {
             await deHiveTokensale.adminSetRates(
                 addressZero, 100000, {from: deployer});
-<<<<<<< HEAD
             // Advance time to pre-sale stage
             await timeMachine.advanceTimeAndBlock(
                 PRE_SALE_START - time + 86400);
-=======
-            await timeMachine.advanceTime(
-                    PRE_SALE_END - time - 40000);
->>>>>>> 0e488ce (Completed deposite ic erc20 test coverage, added test coverate for deposite in eth and nux)
             
             // Buy all tokens from presale pool with eth
             await deHiveTokensale.purchaseDHVwithETH({

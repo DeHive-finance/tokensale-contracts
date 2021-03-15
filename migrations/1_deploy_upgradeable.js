@@ -18,7 +18,11 @@ module.exports = async function (deployer) {
     .then(()=>token=DHVToken.address)
     .then(()=>console.log(token));
   console.log("DHVToken deployed successfully");
-  await deployProxy(DeHiveTokensale,[accounts[0],token, USDTToken, DAIToken, NUXToken],{from: deployer})
+  await deployProxy(DeHiveTokensale,[USDTToken, DAIToken, NUXToken, accounts[0],
+    1625097600,
+    123 * 24 * 60 * 60,
+    0, 0, 0,
+    token],{from: deployer})
     .then(()=>instance=DeHiveTokensale.address)
     .then(()=>console.log(instance));
   console.log("DeHiveTokensale deployed successfully");
