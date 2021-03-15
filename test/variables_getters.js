@@ -224,5 +224,53 @@ describe('Test getters for public variables', () => {
             expect((await deHiveTokensale.purchasedPublicSale()).toNumber())
                 .to.equal(purchaseAmountERC20Public);
         });
+
+        it('Should return available tokens', async () => {
+            await deHiveTokensale.adminSetRates(
+                testTokenAddress,
+                100000,
+                {from: deployer}
+            );
+            // Advance time to pre-sale
+            await timeMachine.advanceTimeAndBlock(
+                PRE_SALE_START - time + 86400)
+            
+            // Buy all tokens for erc20 tokens in pre-sale
+            await testToken.approve(
+                deHiveTokensale.address,
+                BigInt('45000000000000000000'),
+                {from: user1}
+            );
+
+            await deHiveTokensale.purchaseDHVwithERC20(
+                testTokenAddress,
+                BigInt('45000000000000000000'),
+                {from: user1}
+            );
+            // Advance time to public sale
+            tmp_blocknum = await web3.eth.getBlockNumber();
+            tmp_block = await web3.eth.getBlock(tmp_blocknum);
+            tmp_time = tmp_block.timestamp;
+            await timeMachine.advanceTimeAndBlock(
+                PUBLIC_SALE_START - tmp_time + 86400);
+            
+            // Buy all tokens for erc20 tokens in public sale
+            await testToken.approve(
+                deHiveTokensale.address,
+                BigInt('120000000000000000000'),
+                {from: user1}
+            );
+
+            await deHiveTokensale.purchaseDHVwithERC20(
+                testTokenAddress,
+                BigInt('120000000000000000000'),
+                {from: user1}
+            );
+
+            expect((await deHiveTokensale.publicSaleAvailableDHV()).toString())
+                .to.equal('5000000000000000000');
+            
+
+        });
     });
 });
