@@ -35,9 +35,12 @@ const DHVToken = artifacts.require('DHVToken');
 const unsupportedToken = '0xc944e90c64b2c07662a292be6244bdf05cda44a7';
 
 const addressZero = '0x0000000000000000000000000000000000000000';
-
+const PRE_SALE_START = 1616544000;
 const PRE_SALE_END = 1616716800;
+
 const PUBLIC_SALE_START = 1618358400;
+const PUBLIC_SALE_END = 1618704000;
+
 
 describe('Purchase DHV test coverage', () => {
     let deployer;
@@ -119,7 +122,8 @@ describe('Purchase DHV test coverage', () => {
         });
 
         it('Should not let deposit with unsupported token', async () => {
-            await timeMachine.advanceTime(36*86400);
+            await timeMachine.advanceTime(
+                PRE_SALE_END - time - 40000);
 
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
@@ -217,9 +221,9 @@ describe('Purchase DHV test coverage', () => {
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
             
-            // Advance time to presale stage
-            await timeMachine.advanceTime(
-                    PRE_SALE_END - time - 40000);
+           // Advance time to pre-sale stage
+           await timeMachine.advanceTimeAndBlock(
+            PRE_SALE_START - time + 86400);
             
             // Buy all tokens from presale pool
             await testToken.approve(
@@ -243,9 +247,13 @@ describe('Purchase DHV test coverage', () => {
                 {from: deployer}
             );
 
-            // Advance time to public sale
-            await timeMachine.advanceTime(21*86400); // Get April 15
+            //  // Advance time to public sale
+            let tmp_blocknum = await web3.eth.getBlockNumber();
+            let tmp_block = await web3.eth.getBlock(tmp_blocknum);
+            let tmp_time = tmp_block.timestamp;
 
+            await timeMachine.advanceTimeAndBlock(
+                    PUBLIC_SALE_START - tmp_time + 86400); 
             // Buy all tokens from public pool
             await testToken.approve(
                     deHiveTokensale.address,
@@ -288,6 +296,18 @@ describe('Purchase DHV test coverage', () => {
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
             
+            let balanceBeforeBuying = await web3.eth.getBalance(user2);
+            balanceBeforeBuying = await web3.utils.fromWei(
+                await balanceBeforeBuying.toString(),
+                'ether'
+            );
+
+            let treasuryBalance = await web3.eth.getBalance(treasury);
+             treasuryBalance = await web3.utils.fromWei(
+                await treasuryBalance.toString(),
+                'ether'
+            );
+
             await deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
                      value: await web3.utils.toWei('1', 'ether')  
@@ -300,19 +320,23 @@ describe('Purchase DHV test coverage', () => {
                 expect(
                     await web3.utils.fromWei((await deHiveTokensale.purchasedPreSale())
                     .toString(), 'ether'))
-                    .to.equal('1');        
-            
-            expect(
-                Number.parseInt(await web3.utils.fromWei(
-                    (await web3.eth.getBalance(user2)).toString(),
-                    'ether')))
-                    .to.be.lessThan(99);
+                    .to.equal('1');  
 
-            expect(
-                await web3.utils.fromWei(
-                    (await web3.eth.getBalance(treasury)).toString(),
-                    'ether'))
-                    .to.equal('101');
+            let current_balance = await web3.eth.getBalance(user2);
+            current_balance = await(web3.utils.fromWei(
+                await current_balance.toString(),
+                 'ether')
+            );
+            expect(Number(current_balance))
+                .to.be.lessThan(Number(balanceBeforeBuying));
+
+            current_balance = await web3.eth.getBalance(treasury);
+            current_balance = await(web3.utils.fromWei(
+                await current_balance.toString(),
+                 'ether')
+            );
+            expect(Number(current_balance))
+                .to.equal(Number(treasuryBalance) + 1);
         });
 
         it('Should buy tokens with eth in public sale', async () => {
@@ -322,6 +346,18 @@ describe('Purchase DHV test coverage', () => {
             await timeMachine.advanceTime(
                 PUBLIC_SALE_START - time + 86400); // Get April 15
             
+            let balanceBeforeBuying = await web3.eth.getBalance(user2);
+            balanceBeforeBuying = await web3.utils.fromWei(
+                await balanceBeforeBuying.toString(),
+                'ether'
+            );
+    
+            let treasuryBalance = await web3.eth.getBalance(treasury);
+            treasuryBalance = await web3.utils.fromWei(
+                await treasuryBalance.toString(),
+                'ether'
+            );
+
             await deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
                      value: await web3.utils.toWei('1', 'ether')  
@@ -334,18 +370,22 @@ describe('Purchase DHV test coverage', () => {
                      await web3.utils.fromWei((await deHiveTokensale.purchasedPublicSale())
                         .toString(), 'ether'))
                         .to.equal('1');        
-                    
-            expect(
-                 Number.parseInt(await web3.utils.fromWei(
-                        (await web3.eth.getBalance(user2)).toString(),
-                        'ether')))
-                        .to.be.lessThan(99);
+            
+            let current_balance = await web3.eth.getBalance(user2);
+            current_balance = await(web3.utils.fromWei(
+                    await current_balance.toString(),
+                    'ether')
+            );
+            expect(Number(current_balance))
+                .to.be.lessThan(Number(balanceBeforeBuying));
         
-             expect(
-                    await web3.utils.fromWei(
-                        (await web3.eth.getBalance(treasury)).toString(),
-                        'ether'))
-                        .to.equal('101');
+            current_balance = await web3.eth.getBalance(treasury);
+            current_balance = await(web3.utils.fromWei(
+                    await current_balance.toString(),
+                     'ether')
+                );
+             expect(Number(current_balance))
+                    .to.equal(Number(treasuryBalance) + 1);
         });
 
         it('Should sell tokens only during sale stages', async () => {
@@ -420,8 +460,9 @@ describe('Purchase DHV test coverage', () => {
         it('Cant buy tokens during presale if presale pool is empty', async () => {
             await deHiveTokensale.adminSetRates(
                 addressZero, 100000, {from: deployer});
-            await timeMachine.advanceTime(
-                    PRE_SALE_END - time - 40000);
+            // Advance time to pre-sale stage
+            await timeMachine.advanceTimeAndBlock(
+                PRE_SALE_START - time + 86400);
             
             // Buy all tokens from presale pool with eth
             await deHiveTokensale.purchaseDHVwithETH({
@@ -445,9 +486,9 @@ describe('Purchase DHV test coverage', () => {
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
 
-            // Advance time to presale stage
-            await timeMachine.advanceTime(
-                    PRE_SALE_END - time - 40000);
+            // Advance time to pre-sale stage
+            await timeMachine.advanceTimeAndBlock(
+                PRE_SALE_START - time + 86400);
             
             // Buy all tokens tokens from presale pool with eth
             await deHiveTokensale.purchaseDHVwithETH({
@@ -466,16 +507,28 @@ describe('Purchase DHV test coverage', () => {
                 {from: deployer}
             );
 
-            // Advance time to public sale
-            await timeMachine.advanceTime(21*86400); // Get April 15
+            //  // Advance time to public sale
+            let tmp_blocknum = await web3.eth.getBlockNumber();
+            let tmp_block = await web3.eth.getBlock(tmp_blocknum);
+            let tmp_time = tmp_block.timestamp;
+
+            await timeMachine.advanceTimeAndBlock(
+                    PUBLIC_SALE_START - tmp_time + 86400); 
             
             /* 
                 Buy All tokens from public sale pool
             */
+           const user2Balance = await web3.utils.fromWei(
+            await web3.eth.getBalance(user2),
+            'ether'
+            );
+            // Add ether if amount exceeds balance
+           if(await(user2Balance < 120)) {
             await web3.eth.sendTransaction(
                 { to:user2,
                  from:deployer,
                  value: await web3.utils.toWei('30', 'ether')});
+            }
 
             await deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
@@ -508,9 +561,9 @@ describe('Purchase DHV test coverage', () => {
         it('Can buy tokens with NUX only during presale stage', async () => {
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
-            // Advance time to presale stage
-            await timeMachine.advanceTime(
-                PRE_SALE_END - time - 40000);
+            // Advance time to pre-sale stage
+            await timeMachine.advanceTimeAndBlock(
+                PRE_SALE_START - time + 86400);
             
             // Buy tokens with nux during presale
             await deHiveTokensale.purchaseDHVwithNUX(
@@ -523,8 +576,13 @@ describe('Purchase DHV test coverage', () => {
             expect((await testToken.balanceOf(treasury)).toNumber())
                 .to.equal(20);
             
-            // Advance time to public sale
-            await timeMachine.advanceTime(21*86400); // Get April 15
+            //  // Advance time to public sale
+            let tmp_blocknum = await web3.eth.getBlockNumber();
+            let tmp_block = await web3.eth.getBlock(tmp_blocknum);
+            let tmp_time = tmp_block.timestamp;
+
+            await timeMachine.advanceTimeAndBlock(
+                    PUBLIC_SALE_START - tmp_time + 86400); 
             
             await testToken.approve(
                     deHiveTokensale.address,

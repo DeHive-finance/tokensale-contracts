@@ -9,8 +9,12 @@ const DeHiveTokensale = artifacts.require('DeHiveTokenSaleTest');
 const TestToken = artifacts.require('TestToken');
 const DHVToken = artifacts.require('DHVToken');
 
+const PRE_SALE_START = 1616544000;
 const PRE_SALE_END = 1616716800;
+
 const PUBLIC_SALE_START = 1618358400;
+const PUBLIC_SALE_END = 1618704000;
+
 const VESTING_START = 1625097600;
 const VESTING_DURATION = 123 * 24 * 60 * 60;
 
@@ -60,7 +64,7 @@ describe('Claim from vesting functionality coverage', () => {
            // Buy tokens during sale stages
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
-            await timeMachine.advanceTime(
+            await timeMachine.advanceTimeAndBlock(
                 PUBLIC_SALE_START - time + 86400); // Get April 15
 
             await testToken.approve(
@@ -80,8 +84,15 @@ describe('Claim from vesting functionality coverage', () => {
                 BigInt('10000000000000000000000000'),
                 {from:deployer}
             );
-            // Advance time to vest stage
-            await timeMachine.advanceTime(79*86400);
+
+            //Advance time to vesting stage
+            let tmp_blocknum = await web3.eth.getBlockNumber();
+            let tmp_block = await web3.eth.getBlock(tmp_blocknum);
+            let tmp_time = tmp_block.timestamp;
+
+            await timeMachine.advanceTimeAndBlock(
+                VESTING_START - tmp_time + 86400);
+
             // Claim vested tokens
             await deHiveTokensale.claim({from: user1});
             const claimedAmount = (await dhvToken.balanceOf(user1)).toNumber();
@@ -95,8 +106,10 @@ describe('Claim from vesting functionality coverage', () => {
             // Buy tokens during sale stages
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
+
             await timeMachine.advanceTime(
                 PUBLIC_SALE_START - time + 86400); // Get April 15
+
             await testToken.approve(
                     deHiveTokensale.address,
                     BigInt('10000000000000000000'),
@@ -118,7 +131,7 @@ describe('Claim from vesting functionality coverage', () => {
             // Try to claim
             await truffleAssert.reverts(
                 deHiveTokensale.claim({from: user1}),
-                "TokenVesting: no tokens are due"
+                "SafeMath: subtraction overflow"
             );
        });
 
@@ -163,8 +176,13 @@ describe('Claim from vesting functionality coverage', () => {
                     {from:deployer}
                 );
             
-            // Advance time to the finish of vesting period
-            await timeMachine.advanceTime(205*86400);
+            // Advance time to the end of vesting stage
+            tmp_blocknum = await web3.eth.getBlockNumber();
+            tmp_block = await web3.eth.getBlock(tmp_blocknum);
+            tmp_time = tmp_block.timestamp;
+            await timeMachine.advanceTimeAndBlock(
+                (VESTING_START + VESTING_DURATION - tmp_time) + 86400);
+
             // Claim vested tokens
             await deHiveTokensale.claim({from: user1});
             const claimedAmount = (await dhvToken.balanceOf(user1)).toNumber();
@@ -178,7 +196,7 @@ describe('Claim from vesting functionality coverage', () => {
             // Buy tokens during sale stages
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
-            await timeMachine.advanceTime(
+            await timeMachine.advanceTimeAndBlock(
                 PUBLIC_SALE_START - time + 86400); // Get April 15
             await testToken.approve(
                     deHiveTokensale.address,
@@ -200,17 +218,11 @@ describe('Claim from vesting functionality coverage', () => {
             // Set vestingStart + one day
             let tmp_blocknum = await web3.eth.getBlockNumber();
             let tmp_block = await web3.eth.getBlock(tmp_blocknum);
-            let diffTime = tmp_block.timestamp; 
+            let tmp_time = tmp_block.timestamp;
 
-            await timeMachine.advanceTime(
-                        VESTING_START - diffTime + 86400);
-            // Check that time is correct
-            // tmp_blocknum = await web3.eth.getBlockNumber();
-            // tmp_block = await web3.eth.getBlock(tmp_blocknum);
-            // diffTime = tmp_block.timestamp;
+            await timeMachine.advanceTimeAndBlock(
+                VESTING_START - tmp_time + 86400);
 
-            // expect(diffTime).to.equal(VESTING_START + 86400);
-             // Claim vested tokens
              await deHiveTokensale.claim({from: user1});
              const claimedAmount = (await dhvToken.balanceOf(user1)).toNumber();
              
@@ -222,7 +234,7 @@ describe('Claim from vesting functionality coverage', () => {
             // Buy tokens during sale stages
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
-            await timeMachine.advanceTime(
+            await timeMachine.advanceTimeAndBlock(
                 PUBLIC_SALE_START - time + 86400); // Get April 15
             await testToken.approve(
                     deHiveTokensale.address,
@@ -244,8 +256,10 @@ describe('Claim from vesting functionality coverage', () => {
             // Set vestingStart + one day
             let tmp_blocknum = await web3.eth.getBlockNumber();
             let tmp_block = await web3.eth.getBlock(tmp_blocknum);
-            let diffTime = tmp_block.timestamp; 
-            await timeMachine.advanceTime(VESTING_START - diffTime + 86400);
+            let tmp_time = tmp_block.timestamp;
+
+            await timeMachine.advanceTimeAndBlock(
+                VESTING_START - tmp_time + 86400);
             // Claim vested tokens
             await deHiveTokensale.claim({from: user1});
             let claimedAmount = (await dhvToken.balanceOf(user1)).toNumber();
@@ -260,15 +274,15 @@ describe('Claim from vesting functionality coverage', () => {
             expect((await deHiveTokensale.claimed(user1)).toNumber())
                .to.equal(claimedAmount); 
             // Claim vesting tokens after 1 day
-            await timeMachine.advanceTime(86400);
+            await timeMachine.advanceTimeAndBlock(86400);
             console.log('Claimable: ', 
             (await deHiveTokensale.claimable(user1)).toNumber());
             claimedAmount = claimedAmount +
                          (await deHiveTokensale.claimable(user1)).toNumber();
             await deHiveTokensale.claim({from: user1});
             
-            // expect((await dhvToken.balanceOf(user1)).toNumber())
-            //     .to.equal(claimedAmount);
+            expect((await dhvToken.balanceOf(user1)).toNumber())
+                .to.equal(claimedAmount);
             expect((await deHiveTokensale.claimed(user1)).toNumber())
                 .to.equal(claimedAmount);           
        });
