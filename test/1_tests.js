@@ -295,6 +295,18 @@ describe('Purchase DHV test coverage', () => {
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
             
+            let balanceBeforeBuying = await web3.eth.getBalance(user2);
+            balanceBeforeBuying = await web3.utils.fromWei(
+                await balanceBeforeBuying.toString(),
+                'ether'
+            );
+
+            let treasuryBalance = await web3.eth.getBalance(treasury);
+             treasuryBalance = await web3.utils.fromWei(
+                await treasuryBalance.toString(),
+                'ether'
+            );
+
             await deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
                      value: await web3.utils.toWei('1', 'ether')  
