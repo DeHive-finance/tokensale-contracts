@@ -4,8 +4,26 @@ import "./DeHiveTokensale.sol";
 
 contract DeHiveTokensaleMock is DeHiveTokensale {
 
-    function initializeMock(address _treasury, address _dhv, address _usdt, address _dai, address _nux) public  {
-        this.initialize(_treasury, _dhv, _usdt, _dai, _nux);
+    function initializeMock(address _DAIToken,
+        address _USDTToken,
+        address _NUXToken,
+        address treasury,
+        uint _vestingStart,
+        uint _vestingDuration,
+        uint _purchasedWithNUX,
+        uint _purchasedPreSale,
+        uint _purchasedPublicSale,
+        address dhv) public initializer {
+        this.initialize(_DAIToken,
+            _USDTToken,
+            _NUXToken,
+            treasury,
+            _vestingStart,
+            _vestingDuration,
+            _purchasedWithNUX,
+            _purchasedPreSale,
+            _purchasedPublicSale,
+            dhv);
     }
     function adminSetRatesMock(address _token, uint256 _rate) public {
         this.adminSetRates(_token, _rate);

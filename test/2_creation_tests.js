@@ -9,33 +9,30 @@ const DHVT=artifacts.require("DHVToken");
 const TestERC20 = artifacts.require("TestERC20");
 
 
-describe("Test set for token properties", ()=>{
+describe("Test set for admin methods and contract creation", ()=>{
     const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
-    let deployer;
+    let deployer, user;
     let treasury;
     let tokensale;
-    let oldtoken;
-    let user;
-    let oldTreasury;
-    let testToken;
-    let testaddr;
-    let time;
-    let blocknum;
-    let block;
-    let isNotOver;
-    let prestart;
-    let preend;
+    let oldToken, oldTreasury, oldDhv;
+    let testToken, testaddr;
+    let time, blocknum, block, isNotOver;
+    let prestart, preend;
     before(async() => {
         [
           deployer,
           treasury,
           user, 
           oldDhv, oldTreasury,
-          oldtoken
+          oldToken
         ] = await web3.eth.getAccounts();
         dhv=await DHVT.new({from:deployer});
         testToken = await TestERC20.new({from:deployer});
-        tokensale = await deployProxy(DHTokensale, [oldTreasury,oldDhv, oldtoken, oldtoken, oldtoken], {from: deployer});
+        tokensale = await deployProxy(DHTokensale, [oldToken, oldToken, oldToken, oldTreasury, 
+            1625097600,
+            123 * 24 * 60 * 60,
+            0, 0, 0,
+            oldDhv], {from: deployer});
         prestart =await tokensale.PRE_SALE_START.call();
         preend = await tokensale.PRE_SALE_END.call();
         testaddr=testToken.address;
@@ -44,12 +41,17 @@ describe("Test set for token properties", ()=>{
     describe("DHTokensale creation", ()=>{
         it("Right token addresses", async()=>{
             expect(await tokensale.DHVToken()).to.equal(oldDhv);
-            expect(await tokensale.getUSDTToken()).to.equal(oldtoken);
-            expect(await tokensale.getDAIToken()).to.equal(oldtoken);
-            expect(await tokensale.getNUXToken()).to.equal(oldtoken);
+            expect(await tokensale.getUSDTToken()).to.equal(oldToken);
+            expect(await tokensale.getDAIToken()).to.equal(oldToken);
+            expect(await tokensale.getNUXToken()).to.equal(oldToken);
         });
         it("Upgrades correctly, saves previous values", async()=>{
-            tokensale = await deployProxy(DHTokensale, [treasury, dhv.address, testaddr, testaddr, testaddr]);
+            tokensale = await deployProxy(DHTokensale, [testaddr, testaddr, testaddr, 
+                treasury,
+                1625097600,
+                123 * 24 * 60 * 60, 
+                0, 0, 0, 
+                dhv.address], {from:deployer});
             expect(await tokensale.DHVToken()).to.equal(dhv.address);
             expect(await tokensale.getUSDTToken()).to.equal(testaddr);
             expect(await tokensale.getDAIToken()).to.equal(testaddr);
