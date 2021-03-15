@@ -71,8 +71,8 @@ describe("Test set for admin methods and contract creation", ()=>{
         });
 
         it("adminSetRates() non-zero address provided", async () =>{
-            await tokensale.adminSetRates(testToken.address, 100000, {from: deployer});
-            expect((await tokensale.rates(testToken.address)).toNumber()).to.equal(100000);
+            await tokensale.adminSetRates(testaddr, 100000, {from: deployer});
+            expect((await tokensale.rates(testaddr)).toNumber()).to.equal(100000);
         });
 
         it("adminWithdraw() works", async ()=>{
@@ -82,10 +82,10 @@ describe("Test set for admin methods and contract creation", ()=>{
             await web3.eth.sendTransaction({
                 from: user,
                 to: tokensale.address,
-                value: web3.utils.toWei('0.000000001', 'ether'),
+                value: web3.utils.toWei('0.00000000001', 'ether'),
               });
             current_balance = await web3.eth.getBalance(tokensale.address);
-            expect(await Number(current_balance)).to.equal(1000000000);
+            expect(await Number(current_balance)).to.equal(10000000);
             blocknum = await web3.eth.getBlockNumber();
             block = await web3.eth.getBlock(blocknum);
             time = block.timestamp;
@@ -95,11 +95,12 @@ describe("Test set for admin methods and contract creation", ()=>{
                 await timeMachine.advanceTime(time+(preend-time+1));
              }
             await console.log("Advanced time: ",block.timestamp)
-            await tokensale.adminWithdraw({from: deployer});
+            await tokensale.adminWithdraw({from: deployer, gas: 40000, gasPrice: 1});
+            await timeMachine.advanceBlock(1);
             current_balance = await web3.eth.getBalance(tokensale.address);
             expect(await Number(current_balance)).to.equal(0);
             let balance = await  web3.eth.getBalance(treasury);
-            expect(Number(balance)).to.equal(Number(treasury_balance)+1000000000);
+            expect(Number(balance)).to.equal(Number(treasury_balance)+10000000);
         });
 
         it("adminWithdrawERC20() works", async ()=>{
@@ -136,10 +137,13 @@ describe("Test set for admin methods and contract creation", ()=>{
             await truffleAssert.reverts(tokensale.purchaseDHVwithERC20(testToken.address, 10000, {from: user}),
                 "Pausable: paused"
             );
-            await tokensale.adminUnpause({from: deployer});
         });
 
         it("adminUnpause() works", async()=>{
+            blocknum = await web3.eth.getBlockNumber();
+            block = await web3.eth.getBlock(blocknum);
+            time = await block.timestamp;
+            isNotOver = await  (time>prestart);
             if(!isNotOver){
                 await console.log("Advanced time: ", time+(prestart-time+1));
                 await timeMachine.advanceTime(prestart-time+1);
