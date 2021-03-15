@@ -38,10 +38,24 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 build
+./abi/AddressUpgradeable.json
+./abi/ERC20.json
+./abi/IERC20.json
+./abi/IERC20Upgradeable.json
+./abi/ContextUpgradeable.json
+./abi/Context.json
+./abi/Initializable.json
+./abi/Ownable.json
+./abi/OwnableUpgradeable.json
+./abi/PausableUpgradeable.json
+./abi/SafeERC20Upgradeable.json
+./abi/SafeMath.json
+./abi/SafeMathUpgradeable.json
 
 # Dependency directories
 node_modules/
 jspm_packages/
+.openzeppelin
 
 # TypeScript v1 declaration files
 typings/
