@@ -320,10 +320,170 @@
           }
         }
       }
+    },
+    "640c57a97577f44fdc16f071eb1c2b3e918054bb1690d1e0f5ea08be7e1ab50e": {
+      "address": "0xe8d06A45944bbDdF8Ce21Aa23CeB898D7F14a70e",
+      "txHash": "0xcb4f277f74fbca015056a56ec7b581f726756b7673b548b1bf5aeb6a2a009cfe",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:74"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "_paused",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:28"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:96"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "vestingStart",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:45"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "vestingDuration",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:46"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "DHVToken",
+            "type": "t_address",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:49"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "USDTToken",
+            "type": "t_address",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:50"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "DAIToken",
+            "type": "t_address",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:51"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "NUXToken",
+            "type": "t_address",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:52"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "purchased",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:54"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "_claimed",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:55"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "purchasedWithNUX",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:57"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "purchasedPreSale",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:58"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "purchasedPublicSale",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:59"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "ETHRate",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:61"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "rates",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:62"
+          },
+          {
+            "contract": "DeHiveTokensale",
+            "label": "_treasury",
+            "type": "t_address",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\DeHiveTokensale.sol:64"
+          },
+          {
+            "contract": "DeHiveTokensaleTest",
+            "label": "_treasury",
+            "type": "t_address",
+            "src": "..\\..\\..\\..\\..\\E\\Philipp\\Documents\\Contracts\\tokensale-contracts\\contracts\\Test\\DeHiveTokensaleTest.sol:6"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
     }
   },
   "admin": {
-    "address": "0xF01C4464F6351E6886f8d4d09b83167ad4aEdEE3",
-    "txHash": "0x7d75b954662cee3a44b2d2533365eee02bc9fce8ad314111c114a59ea9f3f811"
+    "address": "0x1eA45bCc7f4CA1d93bba9E67135c73047E0b932D",
+    "txHash": "0x10a91994fe897498647b0c31caadce12f8e1eeae1e93c18457b64be7df124dc0"
   }
 }
