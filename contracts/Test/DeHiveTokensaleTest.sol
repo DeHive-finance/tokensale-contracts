@@ -19,11 +19,6 @@ address private _treasury;
         address _USDTToken,
         address _NUXToken,
         address treasury,
-<<<<<<< HEAD
-=======
-        uint _vestingStart,
-        uint _vestingDuration,
->>>>>>> origin/develop
         uint _purchasedWithNUX,
         uint _purchasedPreSale,
         uint _purchasedPublicSale,
@@ -31,13 +26,7 @@ address private _treasury;
         super.initialize(_DAIToken,
             _USDTToken,
             _NUXToken,
-<<<<<<< HEAD
              treasury,
-=======
-            treasury,
-            _vestingStart,
-            _vestingDuration,
->>>>>>> origin/develop
             _purchasedWithNUX,
             _purchasedPreSale,
             _purchasedPublicSale,
