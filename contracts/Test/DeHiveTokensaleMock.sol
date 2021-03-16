@@ -8,6 +8,8 @@ contract DeHiveTokensaleMock is DeHiveTokensale {
         address _USDTToken,
         address _NUXToken,
         address treasury,
+        uint _vestingStart,
+        uint _vestingDuration,
         uint _purchasedWithNUX,
         uint _purchasedPreSale,
         uint _purchasedPublicSale,
@@ -16,13 +18,12 @@ contract DeHiveTokensaleMock is DeHiveTokensale {
             _USDTToken,
             _NUXToken,
             treasury,
+            _vestingStart,
+            _vestingDuration,
             _purchasedWithNUX,
             _purchasedPreSale,
             _purchasedPublicSale,
             dhv);
-    }
-    function adminSetvestingStartMock(uint _vestingStart) public {
-        this.adminSetVestingStart(_vestingStart);
     }
     function adminSetRatesMock(address _token, uint256 _rate) public {
         this.adminSetRates(_token, _rate);
