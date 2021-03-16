@@ -178,9 +178,10 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      ***/
 
     /**
-     * @notice For default ETH receiving
+     * @notice For purchase with ETH
      */
-    receive() external virtual payable {
+    receive() external virtual payable onlySale whenNotPaused {
+        _purchaseDHVwithETH();
     }
 
     /**
@@ -230,6 +231,10 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      */
     function purchaseDHVwithETH() external payable onlySale whenNotPaused {
         require(msg.value > 0, "No ETH sent");
+        _purchaseDHVwithETH();
+    }
+
+    function _purchaseDHVwithETH() private {
         uint256 purchaseAmount = _calcEthPurchaseAmount(msg.value);
         require(purchaseAmount > 0, "Rates not set");
 
