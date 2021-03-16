@@ -173,19 +173,31 @@ describe('Gas estimate', () => {
 
         it('Call adminWithdrawERC20 and adminWithdraw and get gas estimate',
              async () => {
-            // Advance time to the end of sale stages
-            await timeMachine.advanceTimeAndBlock(PUBLIC_SALE_END - time + 86400);
+            // Set rates
+            await deHiveTokensale.adminSetRates(
+                addressZero, 100000, {from: deployer});
+            await deHiveTokensale.adminSetRates(
+                testTokenAddress, 100000, {from: deployer});
+            // Advance time to public sale
+            await timeMachine.advanceTimeAndBlock(PUBLIC_SALE_START - time + 86400);
 
             await testToken.transfer(
                 deHiveTokensale.address,
                 100000,
                 {from: user1}
             );
+            
             await web3.eth.sendTransaction({
                 from: deployer,
                 to: deHiveTokensale.address,
                 value: await web3.utils.toWei('1', 'ether')}
             );
+            // Advance time to the end of sale stages
+            let tmp_blocknum = await web3.eth.getBlockNumber();
+            let tmp_block = await web3.eth.getBlock(tmp_blocknum);
+            let tmp_time = tmp_block.timestamp;
+            
+            await timeMachine.advanceTimeAndBlock(PUBLIC_SALE_END - time + 86400);
 
             let gasEstimate = await deHiveTokensale.adminWithdrawERC20.estimateGas(
                 testTokenAddress,
@@ -193,15 +205,15 @@ describe('Gas estimate', () => {
             );
             console.log('adminWithdrawERC20: ', gasEstimate);
 
-            gasEstimate = await deHiveTokensale.adminWithdraw.estimateGas(
-                {from: deployer}
-            );
+            // gasEstimate = await deHiveTokensale.adminWithdraw.estimateGas(
+            //     {from: deployer}
+            // );
 
-            console.log('adminWithdraw: ', gasEstimate);
+            // console.log('adminWithdraw: ', gasEstimate);
         });
 
         it('Call claim and get gas estimate', async () => {
-            await deHiveTokensale.adminSetVestingStart(1625097600);
+            await deHiveTokensale.adminSetVestingStart(1625097601, {from: deployer});
             // setting rate, buying dhv
             await deHiveTokensale.adminSetRates(
                 addressZero, 100000, {from: deployer});
@@ -246,6 +258,14 @@ describe('Gas estimate', () => {
                 {from: user2}
             );
             console.log('Claim after vesting:', gasEstimate);
+        });
+
+        it('Call adminSetVestingStart() and get gas estimate', async () => {
+            let gasEstimate = await deHiveTokensale.adminSetVestingStart.estimateGas(
+                VESTING_START,
+                {from: deployer}
+            );
+            console.log('adminSetVestingStart(): ', gasEstimate);
         });
 
     });
