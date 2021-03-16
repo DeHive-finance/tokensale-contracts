@@ -43,7 +43,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     // *** VESTING PARAMETERS START ***
 
     uint256 public vestingStart /*= 1625097600*/;    //Jul 01 2021 00:00:00 GMT
-    uint256 public vestingDuration /*= 123 * 24 * 60 * 60*/; //123 days - until Oct 31 2021 00:00:00 GMT
+    uint256 public vestingDuration /*= 304 * 24 * 60 * 60*/; //304 days - until Apr 30 2021 00:00:00 GMT
     
     // *** VESTING PARAMETERS END ***
     address public DHVToken;
@@ -62,7 +62,8 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     mapping (address => uint256) public rates;
 
     address private _treasury;
-
+    
+    bool private isSet;
     /***
      * MODIFIERS
      ***/
@@ -113,8 +114,6 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         address _USDTToken,
         address _NUXToken,
         address treasury,
-        uint _vestingStart,
-        uint _vestingDuration,
         uint _purchasedWithNUX,
         uint _purchasedPreSale,
         uint _purchasedPublicSale,
@@ -131,13 +130,23 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         DAIToken = _DAIToken;
         USDTToken = _USDTToken;
         NUXToken = _NUXToken;
-        vestingStart = _vestingStart;
-        vestingDuration = _vestingDuration;
+        vestingStart = 0;
+        vestingDuration = 304 * 24 * 60 * 60;
         purchasedWithNUX = _purchasedWithNUX;
         purchasedPreSale = _purchasedPreSale;
         purchasedPublicSale = _purchasedPublicSale;
     }
 
+    /**
+     * @notice Updates current vesting start time. Can be used once
+     * @param _vestingStart New vesting start time
+     */
+    function adminSetVestingStart(uint256 _vestingStart) external onlyOwner{
+        require(!isSet, "Vesting start is already set");
+        require(_vestingStart > PUBLIC_SALE_END && block.timestamp < _vestingStart, "Incorrect time provided");
+        vestingStart = _vestingStart;
+        isSet=true;
+    }
 
     /**
      * @notice Sets the rate for the chosen token based on the contracts precision
@@ -304,6 +313,8 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @notice Transfers available for claim vested tokens to the user.
      */
     function claim() external {
+        require(vestingStart!=0, "Vesting start is not set");
+        require(block.timestamp > PUBLIC_SALE_END, "Not allowed to claim now");
         uint256 unclaimed = claimable(_msgSender());
         require(unclaimed > 0, "TokenVesting: no tokens are due");
 

@@ -30,8 +30,6 @@ describe("Test set for public view functions", ()=>{
         testaddr=testToken.address;
         tokensale = await deployProxy(DHTokensale, [testaddr, testaddr, testaddr, 
             treasury,
-            1625097600,
-            123 * 24 * 60 * 60, 
             0, 0, 0, 
             dhv.address], {from:deployer});
         precision=await tokensale.PRECISION.call();
@@ -39,7 +37,6 @@ describe("Test set for public view functions", ()=>{
         pubstart = await tokensale.PUBLIC_SALE_START.call();
         prestart =await tokensale.PRE_SALE_START.call();
         preend = await tokensale.PRE_SALE_END.call();
-        vstart = await tokensale.vestingStart.call();
         vdur = await tokensale.vestingDuration.call()
         
 
@@ -67,6 +64,8 @@ describe("Test set for public view functions", ()=>{
     });
 
     it("claimed()/claimable() return correct value", async ()=>{
+        await tokensale.adminSetVestingStart(1625097600);
+        vstart = await tokensale.vestingStart.call();
         await tokensale.adminSetRates(NULL_ADDRESS, 10000, {from: deployer});
         blocknum = await web3.eth.getBlockNumber();
         block = await web3.eth.getBlock(blocknum);

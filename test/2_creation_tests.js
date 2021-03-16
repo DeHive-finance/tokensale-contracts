@@ -17,7 +17,7 @@ describe("Test set for admin methods and contract creation", ()=>{
     let oldToken, oldTreasury, oldDhv;
     let testToken, testaddr;
     let time, blocknum, block, isNotOver;
-    let prestart, preend;
+    let prestart, preend, pubend;
     before(async() => {
         [
           deployer,
@@ -29,12 +29,11 @@ describe("Test set for admin methods and contract creation", ()=>{
         dhv=await DHVT.new({from:deployer});
         testToken = await TestERC20.new({from:deployer});
         tokensale = await deployProxy(DHTokensale, [oldToken, oldToken, oldToken, oldTreasury, 
-            1625097600,
-            123 * 24 * 60 * 60,
             0, 0, 0,
             oldDhv], {from: deployer});
         prestart =await tokensale.PRE_SALE_START.call();
         preend = await tokensale.PRE_SALE_END.call();
+        pubend = await tokensale.PUBLIC_SALE_END.call();
         testaddr=testToken.address;
     });
 
@@ -48,8 +47,6 @@ describe("Test set for admin methods and contract creation", ()=>{
         it("Upgrades correctly, saves previous values", async()=>{
             tokensale = await deployProxy(DHTokensale, [testaddr, testaddr, testaddr, 
                 treasury,
-                1625097600,
-                123 * 24 * 60 * 60, 
                 0, 0, 0, 
                 dhv.address], {from:deployer});
             expect(await tokensale.DHVToken()).to.equal(dhv.address);
@@ -73,6 +70,16 @@ describe("Test set for admin methods and contract creation", ()=>{
         it("adminSetRates() non-zero address provided", async () =>{
             await tokensale.adminSetRates(testaddr, 100000, {from: deployer});
             expect((await tokensale.rates(testaddr)).toNumber()).to.equal(100000);
+        });
+
+        it("admitSetVestingStart() sets incorrect value. Before public sale end", async()=>{
+            await truffleAssert.reverts(tokensale.adminSetVestingStart(pubend-1, {from: deployer}), 
+            "Incorrect time provided");
+        });
+
+        it("admitSetVestingStart() sets correct value.", async()=>{
+            await truffleAssert.reverts(tokensale.adminSetVestingStart(162510000, {from: deployer}), 
+            "Incorrect time provided");
         });
 
         it("adminWithdraw() works", async ()=>{
@@ -102,7 +109,7 @@ describe("Test set for admin methods and contract creation", ()=>{
             let balance = await  web3.eth.getBalance(treasury);
             expect(Number(balance)).to.equal(Number(treasury_balance)+10000000);
         });
-
+        
         it("adminWithdrawERC20() works", async ()=>{
             expect((await testToken.balanceOf(tokensale.address)).toNumber()).to.equal(0);
             expect((await testToken.balanceOf(treasury)).toNumber()).to.equal(0);
