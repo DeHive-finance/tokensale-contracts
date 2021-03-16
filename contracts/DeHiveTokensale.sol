@@ -120,6 +120,9 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         address dhv) virtual public initializer {
         require(treasury != address(0), "Zero address");
         require(dhv != address(0), "Zero address");
+        require(_DAIToken != address(0), "Zero address");
+        require(_USDTToken != address(0), "Zero address");
+        require(_NUXToken != address(0), "Zero address");
 
         __Ownable_init();
         __Pausable_init();
@@ -301,7 +304,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @notice Returns DHV amount for 1 external token
      * @param _token External toke (DAI, USDT, NUX, 0 address for ETH)
      */
-    function rateForToken(address _token) public view returns(uint256) {
+    function rateForToken(address _token) external view returns(uint256) {
         if (_token == address(0)) {
             return _calcEthPurchaseAmount(10**18);
         }
@@ -333,7 +336,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @param _user Address of the user who purchased tokens
      * @return The amount of the token claimed.
      */
-    function claimed(address _user) public view returns (uint256) {
+    function claimed(address _user) external view returns (uint256) {
         return _claimed[_user];
     }
 
