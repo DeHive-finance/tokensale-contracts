@@ -43,7 +43,11 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     // *** VESTING PARAMETERS START ***
 
     uint256 public vestingStart /*= 1625097600*/;    //Jul 01 2021 00:00:00 GMT
+<<<<<<< HEAD
     uint256 public vestingDuration /*= 304 * 24 * 60 * 60*/; //304 days - until Apr 30 2021 00:00:00 GMT
+=======
+    uint256 public vestingDuration /*= 123 * 24 * 60 * 60*/; //123 days - until Oct 31 2021 00:00:00 GMT
+>>>>>>> origin/develop
     
     // *** VESTING PARAMETERS END ***
     address public DHVToken;
@@ -114,6 +118,11 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         address _USDTToken,
         address _NUXToken,
         address treasury,
+<<<<<<< HEAD
+=======
+        uint _vestingStart,
+        uint _vestingDuration,
+>>>>>>> origin/develop
         uint _purchasedWithNUX,
         uint _purchasedPreSale,
         uint _purchasedPublicSale,
@@ -130,8 +139,13 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         DAIToken = _DAIToken;
         USDTToken = _USDTToken;
         NUXToken = _NUXToken;
+<<<<<<< HEAD
         vestingStart = 0;
         vestingDuration = 304 * 24 * 60 * 60;
+=======
+        vestingStart = _vestingStart;
+        vestingDuration = _vestingDuration;
+>>>>>>> origin/develop
         purchasedWithNUX = _purchasedWithNUX;
         purchasedPreSale = _purchasedPreSale;
         purchasedPublicSale = _purchasedPublicSale;
