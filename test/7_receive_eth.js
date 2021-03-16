@@ -41,8 +41,6 @@ describe('Test receive() and purchaseDHVwithERC20()', () => {
         testToken.address,
         testToken.address,
         treasury,
-        VESTING_START,
-        VESTING_DURATION,
         0,
         0,
         0,
