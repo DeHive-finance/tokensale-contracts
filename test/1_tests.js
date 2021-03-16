@@ -63,8 +63,6 @@ describe('Purchase DHV test coverage', () => {
         testToken.address,
         testToken.address,
         treasury,
-        1625097600,
-        123 * 24 * 60 * 60,
         0,
         0,
         0,

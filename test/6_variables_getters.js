@@ -10,13 +10,8 @@ const TestToken = artifacts.require('TestToken');
 const DHVToken = artifacts.require('DHVToken');
 
 const PRE_SALE_START = 1616544000;
-const PRE_SALE_END = 1616716800;
-
 const PUBLIC_SALE_START = 1618358400;
-const PUBLIC_SALE_END = 1618704000;
 
-const VESTING_START = 1625097600;
-const VESTING_DURATION = 123 * 24 * 60 * 60;
 
 const addressZero = '0x0000000000000000000000000000000000000000';
 
@@ -41,8 +36,6 @@ describe('Test getters for public variables', () => {
         testToken.address,
         testToken.address,
         treasury,
-        1625097600,
-        123 * 24 * 60 * 60,
         0,
         0,
         0,
@@ -82,9 +75,12 @@ describe('Test getters for public variables', () => {
         it('Should show all public variables and variables for rates', async () => {
             // variables
             expect((await deHiveTokensale.vestingStart()).toNumber())
+                .to.equal(0);
+            await deHiveTokensale.adminSetVestingStart(1625097600);
+            expect((await deHiveTokensale.vestingStart()).toNumber())
                 .to.equal(1625097600);
             expect((await deHiveTokensale.vestingDuration()).toNumber())
-                .to.equal(123 * 24 * 60 * 60);
+                .to.equal(304 * 24 * 60 * 60);
             expect((await deHiveTokensale.DHVToken()).toString())
                 .to.equal(dhvToken.address);
             // ETHRate and rates(mapping)
