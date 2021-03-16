@@ -226,11 +226,11 @@ describe('Gas estimate', () => {
                     value: await web3.utils.toWei('1', 'ether')
                 });
             
-            dhvToken.transfer(
+            dhvToken.mint(
                 deHiveTokensale.address,
                 BigInt('5000000000000000000'),
                 {from: deployer}
-            );           
+            );
 
             //Advance time to vesting stage
             let tmp_blocknum = await web3.eth.getBlockNumber();

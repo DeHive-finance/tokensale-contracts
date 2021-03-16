@@ -79,7 +79,7 @@ describe("Test set for public view functions", ()=>{
         await console.log("Advanced time: ", time);
         calc_returned = await tokensale.claimable(user);
         expect(await calc_returned).to.not.equal(0);
-        await dhv.transfer(tokensale.address, 10000, {from: deployer});
+        await dhv.mint(tokensale.address, 10000, {from: deployer});
         await tokensale.claim({from: user});
         expect((await dhv.balanceOf(user)).toNumber()).to.equal(await (calc_returned).toNumber());
         claimed = await tokensale.claimed(user)
