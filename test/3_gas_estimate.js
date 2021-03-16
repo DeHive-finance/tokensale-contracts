@@ -42,8 +42,6 @@ describe('Gas estimate', () => {
         testToken.address,
         testToken.address,
         treasury,
-        1625097600,
-        123 * 24 * 60 * 60,
         0,
         0,
         0,
@@ -203,6 +201,7 @@ describe('Gas estimate', () => {
         });
 
         it('Call claim and get gas estimate', async () => {
+            await deHiveTokensale.adminSetVestingStart(1625097600);
             // setting rate, buying dhv
             await deHiveTokensale.adminSetRates(
                 addressZero, 100000, {from: deployer});

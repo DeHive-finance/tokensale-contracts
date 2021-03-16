@@ -39,8 +39,6 @@ describe('Claim from vesting functionality coverage', () => {
         testToken.address,
         testToken.address,
         treasury,
-        1625097600,
-        123 * 24 * 60 * 60,
         0,
         0,
         0,
@@ -56,6 +54,7 @@ describe('Claim from vesting functionality coverage', () => {
             // Create a snapshot
             const snapshot = await timeMachine.takeSnapshot();
             snapshotId = snapshot['result'];
+            await deHiveTokensale.adminSetVestingStart(1625097600);
            });
     
         afterEach(async() => await timeMachine.revertToSnapshot(snapshotId));
@@ -131,7 +130,7 @@ describe('Claim from vesting functionality coverage', () => {
             // Try to claim
             await truffleAssert.reverts(
                 deHiveTokensale.claim({from: user1}),
-                "SafeMath: subtraction overflow"
+                "Not allowed to claim now"
             );
        });
 
@@ -192,7 +191,7 @@ describe('Claim from vesting functionality coverage', () => {
                 .to.equal(claimedAmount);
        });
 
-       it('Should claim exactly 1/127 of vesting', async () => {
+       it('Should claim exactly 1/304 of vesting', async () => {
             // Buy tokens during sale stages
             await deHiveTokensale.adminSetRates(
                 testTokenAddress, 100000, {from: deployer});
@@ -205,7 +204,7 @@ describe('Claim from vesting functionality coverage', () => {
                 );
             await deHiveTokensale.purchaseDHVwithERC20(
                         testToken.address,
-                        BigInt('127000'),
+                        BigInt('304000'),
                         {from: user1}
                     );
                 
@@ -227,7 +226,7 @@ describe('Claim from vesting functionality coverage', () => {
              const claimedAmount = (await dhvToken.balanceOf(user1)).toNumber();
              
             expect(claimedAmount)
-            .to.equal(1032); // 1032 is exact value which is vested during this time
+            .to.equal(1000); // 1000 is exact value which is vested during this time
        });
 
        it('Cant claim same tokens twice', async () => {

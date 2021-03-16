@@ -36,8 +36,6 @@ describe('Test getters for public variables', () => {
         testToken.address,
         testToken.address,
         treasury,
-        1625097600,
-        123 * 24 * 60 * 60,
         0,
         0,
         0,
@@ -77,9 +75,12 @@ describe('Test getters for public variables', () => {
         it('Should show all public variables and variables for rates', async () => {
             // variables
             expect((await deHiveTokensale.vestingStart()).toNumber())
+                .to.equal(0);
+            await deHiveTokensale.adminSetVestingStart(1625097600);
+            expect((await deHiveTokensale.vestingStart()).toNumber())
                 .to.equal(1625097600);
             expect((await deHiveTokensale.vestingDuration()).toNumber())
-                .to.equal(123 * 24 * 60 * 60);
+                .to.equal(304 * 24 * 60 * 60);
             expect((await deHiveTokensale.DHVToken()).toString())
                 .to.equal(dhvToken.address);
             // ETHRate and rates(mapping)
