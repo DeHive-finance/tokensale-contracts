@@ -12,7 +12,7 @@ contract DHVToken is ERC20, Ownable {
     uint256 public hardCap = 10000000 * 10 ** 18;
     /// @notice Contract's constructor
     /// @dev Mints 10M tokens for the deployer
-    constructor () public ERC20("DeHive Token", "DHV") {
+    constructor () public ERC20("DeHive.finance", "DHV") {
     }
 
     /// @notice Mint method for the exceptional cases
