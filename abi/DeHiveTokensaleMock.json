@@ -220,6 +220,177 @@
   },
   {
     "inputs": [],
+    "name": "adminPause",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "adminSetRates",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "treasury",
+        "type": "address"
+      }
+    ],
+    "name": "adminSetTreasury",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_vestingStart",
+        "type": "uint256"
+      }
+    ],
+    "name": "adminSetVestingStart",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "adminUnpause",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "adminWithdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "ERC20token",
+        "type": "address"
+      }
+    ],
+    "name": "adminWithdrawERC20",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "claim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "claimable",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "claimed",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_DAIToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_USDTToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_NUXToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "treasury",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_purchasedWithNUX",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_purchasedPreSale",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_purchasedPublicSale",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "dhv",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -242,6 +413,57 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "publicSaleAvailableDHV",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "ERC20token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "ERC20amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "purchaseDHVwithERC20",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "purchaseDHVwithETH",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "nuxAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "purchaseDHVwithNUX",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -292,6 +514,25 @@
   {
     "inputs": [],
     "name": "purchasedWithNUX",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      }
+    ],
+    "name": "rateForToken",
     "outputs": [
       {
         "internalType": "uint256",
@@ -414,20 +655,7 @@
         "type": "address"
       }
     ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_vestingStart",
-        "type": "uint256"
-      }
-    ],
-    "name": "adminSetVestingStart",
+    "name": "initializeMock",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -445,7 +673,7 @@
         "type": "uint256"
       }
     ],
-    "name": "adminSetRates",
+    "name": "adminSetRatesMock",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -454,114 +682,37 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "treasury",
+        "name": "_treasury",
         "type": "address"
       }
     ],
-    "name": "adminSetTreasury",
+    "name": "adminSetTreasuryMock",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "adminPause",
+    "name": "adminPauseMock",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "adminUnpause",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "ERC20token",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "ERC20amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "purchaseDHVwithERC20",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "nuxAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "purchaseDHVwithNUX",
+    "name": "adminUnpauseMock",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "purchaseDHVwithETH",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "publicSaleAvailableDHV",
+    "name": "getUSDTToken",
     "outputs": [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
-        "name": "ERC20token",
-        "type": "address"
-      }
-    ],
-    "name": "adminWithdrawERC20",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "adminWithdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_token",
-        "type": "address"
-      }
-    ],
-    "name": "rateForToken",
-    "outputs": [
-      {
-        "internalType": "uint256",
         "name": "",
-        "type": "uint256"
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -569,44 +720,25 @@
   },
   {
     "inputs": [],
-    "name": "claim",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_user",
-        "type": "address"
-      }
-    ],
-    "name": "claimed",
+    "name": "getDAIToken",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address",
         "name": "",
-        "type": "uint256"
+        "type": "address"
       }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_user",
-        "type": "address"
-      }
-    ],
-    "name": "claimable",
+    "inputs": [],
+    "name": "getNUXToken",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address",
         "name": "",
-        "type": "uint256"
+        "type": "address"
       }
     ],
     "stateMutability": "view",

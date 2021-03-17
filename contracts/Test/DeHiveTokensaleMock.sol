@@ -21,9 +21,6 @@ contract DeHiveTokensaleMock is DeHiveTokensale {
             _purchasedPublicSale,
             dhv);
     }
-    function adminSetvestingStartMock(uint _vestingStart) public {
-        this.adminSetVestingStart(_vestingStart);
-    }
     function adminSetRatesMock(address _token, uint256 _rate) public {
         this.adminSetRates(_token, _rate);
     }
