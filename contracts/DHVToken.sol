@@ -23,3 +23,4 @@ contract DHVToken is ERC20, Ownable {
         require(totalSupply().add(_amount) <= hardCap, "Total supply exceeds hard cap");
         _mint(_receiver, _amount);
     }
+}
