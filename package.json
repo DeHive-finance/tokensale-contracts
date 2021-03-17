@@ -12,6 +12,7 @@
     "dev:coverage": "npx truffle run coverage --network coverage --compile-all --solcoverjs ./.solcover.js",
     "dev:contract-size": "npx truffle run contract-size",
     "dev:docgen": "npx solidity-docgen -i ./contracts -o ./docs -t docgen  -H docgen/helpers.js",
+    "deploy:dhv": "npx truffle migrate --migrations_directory './migrations/dhv/'",
     "postinstall": "npm run compile && npm run generate-abi"
   },
   "repository": {

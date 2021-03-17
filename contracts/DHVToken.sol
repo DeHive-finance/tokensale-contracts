@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @notice Initial hard cap for 10M tokens.
 contract DHVToken is ERC20, Ownable {
 
-    uint256 public hardCap = 10000000 * 10 ** 18;
+    uint256 public cap = 10000000 * 10 ** 18;
     /// @notice Contract's constructor
     /// @dev Mints 10M tokens for the deployer
     constructor () public ERC20("DeHive.finance", "DHV") {
@@ -20,7 +20,7 @@ contract DHVToken is ERC20, Ownable {
     function mint(address _receiver, uint256 _amount) external onlyOwner {
         require(_receiver != address(0), "Zero address");
         require(_amount > 0, "Incorrect amount");
-        require(totalSupply().add(_amount) <= hardCap, "Total supply exceeds hard cap");
+        require(totalSupply().add(_amount) <= cap, "Total supply exceeds cap");
         _mint(_receiver, _amount);        
     }
 }

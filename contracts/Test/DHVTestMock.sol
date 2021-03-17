@@ -6,7 +6,7 @@ import "../DHVToken.sol";
 contract DHVTestMock is DHVToken{
     
     function setHardcap(uint256 _hardcap) public{
-        hardCap=_hardcap;
+        cap=_hardcap;
     }
     function mintMock(address _receiver, uint _amount) public{
         this.mint(_receiver, _amount);
