@@ -78,7 +78,7 @@ describe('Claim from vesting functionality coverage', () => {
                 );
             
             // Transfer DHV tokens to TokenSale
-            await dhvToken.transfer(
+            await dhvToken.mint(
                 deHiveTokensale.address,
                 BigInt('10000000000000000000000000'),
                 {from:deployer}
@@ -121,7 +121,7 @@ describe('Claim from vesting functionality coverage', () => {
                     );
                 
             // Transfer DHV tokens to TokenSale
-            await dhvToken.transfer(
+            await dhvToken.mint(
                     deHiveTokensale.address,
                     BigInt('10000000000000000000000000'),
                     {from:deployer}
@@ -138,7 +138,7 @@ describe('Claim from vesting functionality coverage', () => {
            // Advance time to vesting period
             await timeMachine.advanceTime(VESTING_START - time + 86400);
             // Transfer DHV tokens to TokenSale
-            await dhvToken.transfer(
+            await dhvToken.mint(
                 deHiveTokensale.address,
                 BigInt('10000000000000000000000000'),
                 {from:deployer}
@@ -169,7 +169,7 @@ describe('Claim from vesting functionality coverage', () => {
                     );
                 
             // Transfer DHV tokens to TokenSale
-            await dhvToken.transfer(
+            await dhvToken.mint(
                     deHiveTokensale.address,
                     BigInt('10000000000000000000000000'),
                     {from:deployer}
@@ -209,7 +209,7 @@ describe('Claim from vesting functionality coverage', () => {
                     );
                 
             // Transfer DHV tokens to TokenSale
-            await dhvToken.transfer(
+            await dhvToken.mint(
                     deHiveTokensale.address,
                     BigInt('10000000000000000000000000'),
                     {from:deployer}
@@ -247,7 +247,7 @@ describe('Claim from vesting functionality coverage', () => {
                     );
                 
             // Transfer DHV tokens to TokenSale
-            await dhvToken.transfer(
+            await dhvToken.mint(
                     deHiveTokensale.address,
                     BigInt('10000000000000000000000000'),
                     {from:deployer}
