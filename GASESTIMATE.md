@@ -11,31 +11,34 @@ AdminSetTreasury()
     Gas Price: 31320
 
 AdminPause()
-    Gas Price: 48017
+    Gas Price: 48040
 
 AdminUnpause()
-    Gas Price: 32816
+    Gas Price: 32794
 
 PurchaseDHVWithERC20()
-    Gas Price during pre-sale stage: 115269
-    Gas Price during public sale stage: 117149
+    Gas Price during pre-sale stage: 115248
+    Gas Price during public sale stage: 117128
 
 PurchaseDHVWithNux()
-    Gas Price: 115269
+    Gas Price: 115248
 
 PurchaseDHVWithETH()
-    Gas Price during pre-sale stage: 80560
-    Gas Price during public sale stage: 82440
+    Gas Price during pre-sale stage: 80574
+    Gas Price during public sale stage: 82455
 
 AdminWithdrawERC20()
-    Gas Price: 63457
+    Gas Price: 62598
 
 AdminWithdraw()
     Gas Price: 35698
 
 claim()
     during vesting:
-        Gas Price: 86875
+        Gas Price: 86911
     after vesting:
-        Gas Price: 84100
+        Gas Price: 86911
+
+adminSetVestingStart()
+    Gas Price: 52291
 
