@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.12;
 
 import "../DeHiveTokensale.sol";
@@ -8,18 +9,13 @@ contract DeHiveTokensaleMock is DeHiveTokensale {
         address _USDTToken,
         address _NUXToken,
         address treasury,
-        uint _purchasedWithNUX,
-        uint _purchasedPreSale,
-        uint _purchasedPublicSale,
-        address dhv) public initializer {
-        this.initialize(_DAIToken,
-            _USDTToken,
-            _NUXToken,
-            treasury,
-            _purchasedWithNUX,
-            _purchasedPreSale,
-            _purchasedPublicSale,
-            dhv);
+        address dhv) public initializer
+    {
+        DeHiveTokensale.initialize(treasury, dhv);
+        USDTToken = _USDTToken;
+        DAIToken = _DAIToken;
+        NUXToken = _NUXToken;
+
     }
     function adminSetvestingStartMock(uint _vestingStart) public {
         this.adminSetVestingStart(_vestingStart);
