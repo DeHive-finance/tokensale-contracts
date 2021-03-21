@@ -5,7 +5,13 @@ import "../DeHiveTokensale.sol";
 
 contract DeHiveTokensaleMock is DeHiveTokensale {
 
-    function initializeMock(address _DAIToken,
+    uint256 public preSaleStart;
+    uint256 public preSaleEnd;
+    uint256 public publicSaleStart;
+    uint256 public publicSaleEnd;
+
+
+    function initialize(address _DAIToken,
         address _USDTToken,
         address _NUXToken,
         address treasury,
@@ -16,21 +22,13 @@ contract DeHiveTokensaleMock is DeHiveTokensale {
         DAIToken = _DAIToken;
         NUXToken = _NUXToken;
 
-    }
-    function adminSetvestingStartMock(uint _vestingStart) public {
-        this.adminSetVestingStart(_vestingStart);
-    }
-    function adminSetRatesMock(address _token, uint256 _rate) public {
-        this.adminSetRates(_token, _rate);
-    }
-    function adminSetTreasuryMock(address _treasury) public {
-        this.adminSetTreasury(_treasury);
-    }
-     function adminPauseMock() public {
-        this.adminPause();
-    }
-    function adminUnpauseMock() public {
-        this.adminUnpause();
+
+        preSaleStart =    1616594400; //Mar 24 2021 14:00:00 GMT
+        preSaleEnd =      1616803140; //Mar 26 2021 23:59:00 GMT
+
+        publicSaleStart = 1618408800; //Apr 14 2021 14:00:00 GMT
+        publicSaleEnd =   1618790340; //Apr 18 2021 23:59:00 GMT
+
     }
     function getUSDTToken() public view returns(address){
         return USDTToken;
@@ -41,4 +39,36 @@ contract DeHiveTokensaleMock is DeHiveTokensale {
     function getNUXToken() public view returns(address){
         return NUXToken;
     }
+
+    function setPreSale(uint256 start, uint256 end) public {
+        preSaleStart = start;
+        preSaleEnd = end;
+    }
+
+    function setPublicSale(uint256 start, uint256 end) public {
+        publicSaleStart = start;
+        publicSaleEnd = end;
+    }
+
+    function adminSetVestingDuration(uint256 _duration) public {
+        vestingDuration = _duration;
+    }
+
+    function adminSetVestingStart(uint256 _vestingStart) override external {
+        vestingStart = _vestingStart;
+    }
+
+    function _isPreSale() override internal view returns (bool) {
+        return (block.timestamp >= preSaleStart && block.timestamp < preSaleEnd);
+    }
+
+    function _isPublicSale() override internal view returns (bool) {
+        return (block.timestamp >= publicSaleStart && block.timestamp < publicSaleEnd);
+    }
+
+    function _isPublicSaleOver() override internal view returns (bool) {
+        return (block.timestamp >= publicSaleEnd);
+    }
+
+
 }

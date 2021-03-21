@@ -220,6 +220,19 @@
   },
   {
     "inputs": [],
+    "name": "maxTokensAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -375,38 +388,8 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_DAIToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_USDTToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_NUXToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
         "name": "treasury",
         "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_purchasedWithNUX",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_purchasedPreSale",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_purchasedPublicSale",
-        "type": "uint256"
       },
       {
         "internalType": "address",
@@ -459,6 +442,19 @@
       }
     ],
     "name": "adminSetTreasury",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_maxDHV",
+        "type": "uint256"
+      }
+    ],
+    "name": "adminSetMaxDHV",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

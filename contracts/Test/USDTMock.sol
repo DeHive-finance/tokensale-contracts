@@ -7,7 +7,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract USDTMock is ERC20, Ownable {
 
     constructor () public ERC20("USDTMock", "USM") {
-        _mint(_msgSender(), 10000000 * 10 ** 18);
+        _setupDecimals(6);
+        _mint(_msgSender(), 10000000 * 10 ** 6);
     }
 
     /// @notice Burn method for the exceptional cases

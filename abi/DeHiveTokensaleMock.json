@@ -228,6 +228,19 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_maxDHV",
+        "type": "uint256"
+      }
+    ],
+    "name": "adminSetMaxDHV",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_token",
         "type": "address"
@@ -252,19 +265,6 @@
       }
     ],
     "name": "adminSetTreasury",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_vestingStart",
-        "type": "uint256"
-      }
-    ],
-    "name": "adminSetVestingStart",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -342,51 +342,16 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_DAIToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_USDTToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_NUXToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "treasury",
-        "type": "address"
-      },
+    "inputs": [],
+    "name": "maxTokensAmount",
+    "outputs": [
       {
         "internalType": "uint256",
-        "name": "_purchasedWithNUX",
+        "name": "",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_purchasedPreSale",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_purchasedPublicSale",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "dhv",
-        "type": "address"
       }
     ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -417,7 +382,59 @@
   },
   {
     "inputs": [],
+    "name": "preSaleEnd",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "preSaleStart",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "publicSaleAvailableDHV",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "publicSaleEnd",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "publicSaleStart",
     "outputs": [
       {
         "internalType": "uint256",
@@ -635,19 +652,22 @@
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "_purchasedWithNUX",
-        "type": "uint256"
-      },
+        "internalType": "address",
+        "name": "dhv",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_purchasedPreSale",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_purchasedPublicSale",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "treasury",
+        "type": "address"
       },
       {
         "internalType": "address",
@@ -655,52 +675,7 @@
         "type": "address"
       }
     ],
-    "name": "initializeMock",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_token",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_rate",
-        "type": "uint256"
-      }
-    ],
-    "name": "adminSetRatesMock",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_treasury",
-        "type": "address"
-      }
-    ],
-    "name": "adminSetTreasuryMock",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "adminPauseMock",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "adminUnpauseMock",
+    "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -742,6 +717,68 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "start",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "end",
+        "type": "uint256"
+      }
+    ],
+    "name": "setPreSale",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "start",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "end",
+        "type": "uint256"
+      }
+    ],
+    "name": "setPublicSale",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_duration",
+        "type": "uint256"
+      }
+    ],
+    "name": "adminSetVestingDuration",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_vestingStart",
+        "type": "uint256"
+      }
+    ],
+    "name": "adminSetVestingStart",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

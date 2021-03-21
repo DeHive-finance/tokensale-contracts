@@ -40,7 +40,16 @@ module.exports = {
       ),
       network_id: 42,       // Kovan's id
       gas: 12000000,
-      gasPrice: 10000000000
+      gasPrice: 10000000000,
+      websockets: false,
+    },
+    rinkeby: {
+      provider: () => new HDWalletProvider(
+        process.env.RINKEBY_PRIVATE_KEY,
+        'https://rinkeby.infura.io/v3/b20c30c9e04c4a6bb1cd728ff589a15e'
+      ),
+      network_id: 4,
+      websockets: false,
     },
     main: {
       provider: () => new HDWalletProvider(

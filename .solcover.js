@@ -1,3 +1,3 @@
 module.exports = {
-    skipFiles: ['Test/DeHiveTokensaleMock.sol', 'Test/DeHiveTokensaleTest.sol', 'Test/TestERC20.sol', 'Test/TestToken.sol', 'Test/DHVTestMock.sol']
+    skipFiles: ['Test/DeHiveTokensaleMock.sol', 'Test/DeHiveTokensaleMock.sol', 'Test/TestToken.sol', 'Test/TestToken.sol', 'Test/DHVTestMock.sol']
   };

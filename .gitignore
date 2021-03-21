@@ -41,19 +41,26 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 build
-./abi/AddressUpgradeable.json
-./abi/ERC20.json
-./abi/IERC20.json
-./abi/IERC20Upgradeable.json
-./abi/ContextUpgradeable.json
-./abi/Context.json
-./abi/Initializable.json
-./abi/Ownable.json
-./abi/OwnableUpgradeable.json
-./abi/PausableUpgradeable.json
-./abi/SafeERC20Upgradeable.json
-./abi/SafeMath.json
-./abi/SafeMathUpgradeable.json
+flatten
+@openzeppelin
+AddressUpgradeable.json
+ERC20.json
+IERC20.json
+IERC20Upgradeable.json
+ContextUpgradeable.json
+Context.json
+Initializable.json
+Ownable.json
+OwnableUpgradeable.json
+PausableUpgradeable.json
+SafeERC20Upgradeable.json
+SafeMath.json
+SafeMathUpgradeable.json
+
+DAIMock.json
+NuxMock.json
+USDTMock.json
+
 
 # Dependency directories
 node_modules/
