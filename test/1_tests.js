@@ -1,33 +1,12 @@
-// todo DHV address should be correct
-// todo NUX address should be correct
-// todo DAI address should be correct
-// todo Treasury address should be set and correct
-// todo investor should have DHV record according to the NUX rate after purchase
-// todo investor should have DHV record according to the DAI rate after purchase
-// todo investor should have DHV record according to the ETH rate after purchase
-// todo investor should be able to purchase DHV with NUX only within presale period
-// todo investor should not be able to purchase DHV with any ERC20 except NUX, DAI
-// todo investor should not be able to purchase more DHV if there is not enough tokens in NUX pool on presale
-// todo investor should not be able to purchase more DHV if there is not enough tokens in presale pool
-// todo investor should not be able to purchase more DHV if there is not enough tokens in public sale pool + rest of NUX pool
-// todo investor should be able to purchase DHV only within presale and sale start-end period
-// todo investor should be able to release tokens after vesting start according to linear vesting
-// todo investor should not be able to release tokens before vesting start
-// todo investor should receive full amount of purchased tokens after vesting end (start+duration)
-// todo admin should be able to set the rates for ETH, NUX, DAI
-// todo admin should be able to withdraw any ERC20 token from the DeHiveTokensale contract
-// todo admin should not be able to withdraw DHV token from the DeHiveTokensale contract
-// todo admin should be able to withdraw ETH from the DeHiveTokensale contract
-// todo admin should be able to set treasury address
-
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 const Web3 = require('web3');
 const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
 const { expect } = require('chai');
 const timeMachine = require('ganache-time-traveler');
 const truffleAssert = require('truffle-assertions');
+const { default: BigNumber } = require('bignumber.js');
 
-const DeHiveTokensale = artifacts.require('DeHiveTokenSaleTest');
+const DeHiveTokensaleMock = artifacts.require('DeHiveTokensaleMock');
 const TestToken = artifacts.require('TestToken');
 const DHVToken = artifacts.require('DHVToken');
 
@@ -41,6 +20,8 @@ const PRE_SALE_END = 1616716800;
 const PUBLIC_SALE_START = 1618358400;
 const PUBLIC_SALE_END = 1618704000;
 
+const PRECISION = 1000000
+
 
 describe('Purchase DHV test coverage', () => {
     let deployer;
@@ -49,6 +30,7 @@ describe('Purchase DHV test coverage', () => {
     let snapshotId;
     let testTokenAddress;
     let blocknum, block, time;
+
     before(async () => {
         [
             deployer, user1, user2, treasury
@@ -58,19 +40,17 @@ describe('Purchase DHV test coverage', () => {
         dhvToken = await DHVToken.new({from: deployer});
        
        testTokenAddress = testToken.address;
-       deHiveTokensale = await deployProxy(DeHiveTokensale, 
+       deHiveTokensale = await deployProxy(DeHiveTokensaleMock, 
         [testToken.address,
         testToken.address,
         testToken.address,
         treasury,
-        0,
-        0,
-        0,
         dhvToken.address],
         {from: deployer});
 
         await testToken.transfer(user1, 20, {from: deployer});
         await testToken.approve(deHiveTokensale.address, 20, {from: user1});
+        await deHiveTokensale.adminSetMaxDHV(await deHiveTokensale.PUBLIC_SALE_DHV_POOL());
     });
 
     describe('Deposit in ERC20 functionality coverage', () => {
@@ -87,14 +67,14 @@ describe('Purchase DHV test coverage', () => {
 
         it('Sets rates', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
             expect((await deHiveTokensale.rates(testTokenAddress)).toNumber())
-            .to.equal(100000);
+            .to.equal(PRECISION);
         });
 
         it('Should buy DHV in presale', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
 
@@ -108,7 +88,7 @@ describe('Purchase DHV test coverage', () => {
 
         it('Should buy DHV in public sale', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
             await timeMachine.advanceTime(
                 PUBLIC_SALE_START - time + 86400); // Get April 15
 
@@ -120,12 +100,11 @@ describe('Purchase DHV test coverage', () => {
         });
 
         it('Should not let deposit with unsupported token', async () => {
-            await timeMachine.advanceTime(36*86400);
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
 
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
             await truffleAssert.reverts(
                 deHiveTokensale.purchaseDHVwithERC20(unsupportedToken, 20, {from: user1}),
                 "Token not supported"
@@ -134,7 +113,7 @@ describe('Purchase DHV test coverage', () => {
 
         it('Should not let buy DHV when paused', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
 
                 await timeMachine.advanceTime(
                     PRE_SALE_END - time - 40000);
@@ -148,7 +127,7 @@ describe('Purchase DHV test coverage', () => {
 
         it('Amount must be greater than 0', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
 
             await timeMachine.advanceTime(
                     PRE_SALE_END - time - 40000);
@@ -169,9 +148,40 @@ describe('Purchase DHV test coverage', () => {
             );
         });
 
+        it('Cant buy tokens during presale stage if presale pool is empty', async () => {
+            await deHiveTokensale.adminSetRates(
+                testTokenAddress, PRECISION, {from: deployer});
+            
+            // Advance time to presale stage
+                await timeMachine.advanceTime(
+                    PRE_SALE_END - time - 40000);
+            
+            let maxTokens = await deHiveTokensale.PRE_SALE_DHV_POOL();
+            // Buy all tokens from presale pool
+            await testToken.approve(
+                 deHiveTokensale.address,
+                 maxTokens + 1n,
+                 {from: deployer}
+                );
+            await deHiveTokensale.purchaseDHVwithERC20(
+                testTokenAddress,
+                maxTokens,
+                {from: deployer}
+                );
+
+            // Try tu buy more tokens
+            await truffleAssert.reverts(
+                deHiveTokensale.purchaseDHVwithERC20(
+                    testTokenAddress,
+                     1,
+                    {from: deployer}),
+                "Not enough DHV in presale pool"
+            );
+        });
+
         it('Cant buy tokens while sale stages are over', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
             await truffleAssert.reverts(
                 deHiveTokensale.purchaseDHVwithERC20(testTokenAddress, 20, {from: user1}),
                 "Sale stages are over"
@@ -186,63 +196,37 @@ describe('Purchase DHV test coverage', () => {
             );
         });
 
-        it('Cant buy tokens during presale stage if presale pool is empty', async () => {
-            await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
-            
-            // Advance time to presale stage
-                await timeMachine.advanceTime(
-                    PRE_SALE_END - time - 40000);
-            
-            // Buy all tokens from presale pool
-            await testToken.approve(
-                 deHiveTokensale.address,
-                 BigInt('45001000000000000000'),
-                 {from: deployer}
-                );
-            await deHiveTokensale.purchaseDHVwithERC20(
-                testTokenAddress,
-                BigInt('45000000000000000000'),
-                {from: deployer}
-                );
-
-            // Try tu buy more tokens
-            await truffleAssert.reverts(
-                deHiveTokensale.purchaseDHVwithERC20(
-                    testTokenAddress,
-                     BigInt('1000000000000000'),
-                    {from: deployer}),
-                "Not enough DHV in presale pool"
-            );
-        });
-
         it('Cant buy tokens during public stage if public pool is empty', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
             
            // Advance time to pre-sale stage
            await timeMachine.advanceTimeAndBlock(
             PRE_SALE_START - time + 86400);
+
+            let maxTokens = await deHiveTokensale.PRE_SALE_DHV_POOL();
             
             // Buy all tokens from presale pool
             await testToken.approve(
                 deHiveTokensale.address,
-                BigInt('45000000000000000000'),
+                maxTokens + 1n,
                 {from: deployer}
                 );
             await deHiveTokensale.purchaseDHVwithERC20(
                 testTokenAddress,
-                BigInt('45000000000000000000'),
+                maxTokens,
                 {from: deployer}
-            )
+            );
+            
+            maxTokens = await deHiveTokensale.PRE_SALE_DHV_NUX_POOL();
             // Buy all token from nux presale pool
             await testToken.approve(
                 deHiveTokensale.address,
-                BigInt('5000000000000000000'),
+                maxTokens + 1n,
                 {from: deployer}
                 );
             await deHiveTokensale.purchaseDHVwithNUX(
-                BigInt('5000000000000000000'),
+                maxTokens,
                 {from: deployer}
             );
 
@@ -253,15 +237,17 @@ describe('Purchase DHV test coverage', () => {
 
             await timeMachine.advanceTimeAndBlock(
                     PUBLIC_SALE_START - tmp_time + 86400); 
+
+            maxTokens = await deHiveTokensale.PUBLIC_SALE_DHV_POOL();
             // Buy all tokens from public pool
             await testToken.approve(
                     deHiveTokensale.address,
-                     BigInt('120001000000000000000'),
+                    maxTokens + 1n,
                     {from: deployer}
                     );
             await deHiveTokensale.purchaseDHVwithERC20(
                 testTokenAddress,
-                 BigInt('120000000000000000000'),
+                maxTokens,
                 {from: deployer}
                 );
 
@@ -269,7 +255,7 @@ describe('Purchase DHV test coverage', () => {
             await truffleAssert.reverts(
                 deHiveTokensale.purchaseDHVwithERC20(
                     testTokenAddress,
-                    BigInt('1000000000000000'),
+                    1,
                     {from: deployer}),
                 "Not enough DHV in sale pool"
             );
@@ -290,11 +276,12 @@ describe('Purchase DHV test coverage', () => {
 
         it('Should buy tokens with eth in presale', async () => {
             await deHiveTokensale.adminSetRates(
-                addressZero, 100000, {from: deployer});
+                addressZero, PRECISION, {from: deployer});
 
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
             
+            // Save balances
             let balanceBeforeBuying = await web3.eth.getBalance(user2);
             balanceBeforeBuying = await web3.utils.fromWei(
                 await balanceBeforeBuying.toString(),
@@ -302,86 +289,75 @@ describe('Purchase DHV test coverage', () => {
             );
 
             let treasuryBalance = await web3.eth.getBalance(treasury);
-             treasuryBalance = await web3.utils.fromWei(
-                await treasuryBalance.toString(),
-                'ether'
-            );
+            treasuryBalance = web3.utils.fromWei(treasuryBalance.toString(), 'ether');
 
+
+            // Purchase for the first time
             await deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
                      value: await web3.utils.toWei('1', 'ether')  
                         });
 
-                expect(
-                    await web3.utils.fromWei((await deHiveTokensale.purchased(user2))
-                    .toString(), 'ether'))
+            expect(web3.utils.fromWei((await deHiveTokensale.purchased(user2))
+                    .toString(), 'ether'), "Purchase balance changed")
                     .to.equal('1');
-                expect(
-                    await web3.utils.fromWei((await deHiveTokensale.purchasedPreSale())
-                    .toString(), 'ether'))
+            expect(web3.utils.fromWei((await deHiveTokensale.purchasedPreSale())
+                    .toString(), 'ether'), "Total purchased changed")
                     .to.equal('1');  
 
+
             let current_balance = await web3.eth.getBalance(user2);
-            current_balance = await(web3.utils.fromWei(
-                await current_balance.toString(),
-                 'ether')
-            );
-            expect(Number(current_balance))
+            current_balance = (web3.utils.fromWei(current_balance.toString(), 'ether'));
+            expect(Number(current_balance), "ETH not transferred from user")
                 .to.be.lessThan(Number(balanceBeforeBuying));
 
             current_balance = await web3.eth.getBalance(treasury);
-            current_balance = await(web3.utils.fromWei(
-                await current_balance.toString(),
-                 'ether')
-            );
-            expect(Number(current_balance))
+            current_balance = (web3.utils.fromWei(current_balance.toString(),'ether'));
+            expect(Number(current_balance), "ETH not transferred to treasury")
                 .to.equal(Number(treasuryBalance) + 1);
-            let balanceBeforeBuying = await web3.eth.getBalance(user2);
-            balanceBeforeBuying = await web3.utils.fromWei(
-                await balanceBeforeBuying.toString(),
-                'ether'
-            );
-    
-            let treasuryBalance = await web3.eth.getBalance(treasury);
-            treasuryBalance = await web3.utils.fromWei(
-                await treasuryBalance.toString(),
-                'ether'
-            );
 
+
+            // Wait for public sale
+            let tmp_blocknum = await web3.eth.getBlockNumber();
+            let tmp_block = await web3.eth.getBlock(tmp_blocknum);
+            let tmp_time = tmp_block.timestamp;
+            await timeMachine.advanceTime(PUBLIC_SALE_END - tmp_time - 40000);
+
+            // Save balances
+            balanceBeforeBuying = await web3.eth.getBalance(user2);
+            balanceBeforeBuying = await web3.utils.fromWei(balanceBeforeBuying.toString(), 'ether');
+    
+            treasuryBalance = await web3.eth.getBalance(treasury);
+            treasuryBalance = web3.utils.fromWei(treasuryBalance.toString(),'ether');
+
+
+            // Purchase for the second time (public)
             await deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
                      value: await web3.utils.toWei('1', 'ether')  
                         });
-            expect(
-                    await web3.utils.fromWei((await deHiveTokensale.purchased(user2))
-                        .toString(), 'ether'))
-                        .to.equal('1');
-            expect(
-                     await web3.utils.fromWei((await deHiveTokensale.purchasedPublicSale())
-                        .toString(), 'ether'))
+            expect(web3.utils.fromWei((await deHiveTokensale.purchased(user2))
+                        .toString(), 'ether'), "Purchase balance changed (2)")
+                        .to.equal('2');
+            expect(web3.utils.fromWei((await deHiveTokensale.purchasedPublicSale())
+                        .toString(), 'ether'), "Total purchased changed (2)")
                         .to.equal('1');        
             
-            let current_balance = await web3.eth.getBalance(user2);
-            current_balance = await(web3.utils.fromWei(
-                    await current_balance.toString(),
-                    'ether')
-            );
-            expect(Number(current_balance))
+            current_balance = await web3.eth.getBalance(user2);
+            current_balance = (web3.utils.fromWei(current_balance.toString(),'ether'));
+            expect(Number(current_balance), "ETH not transferred from user2")
                 .to.be.lessThan(Number(balanceBeforeBuying));
         
             current_balance = await web3.eth.getBalance(treasury);
-            current_balance = await(web3.utils.fromWei(
-                    await current_balance.toString(),
-                     'ether')
-                );
-             expect(Number(current_balance))
+            current_balance = (web3.utils.fromWei(current_balance.toString(),'ether'));
+             expect(Number(current_balance), "ETH not transferred to treasury (2)")
                     .to.equal(Number(treasuryBalance) + 1);
         
         });
 
         it('Should sell tokens only during sale stages', async () => {
             await deHiveTokensale.adminSetRates(
-                addressZero, 100000, {from: deployer});
+                addressZero, PRECISION, {from: deployer});
 
             await truffleAssert.reverts(
                 deHiveTokensale.purchaseDHVwithETH({
@@ -405,7 +381,7 @@ describe('Purchase DHV test coverage', () => {
 
         it('Cant buy tokens when paused', async () => {
             await deHiveTokensale.adminSetRates(
-                addressZero, 100000, {from: deployer});
+                addressZero, PRECISION, {from: deployer});
 
             await timeMachine.advanceTime(
                     PRE_SALE_END - time - 40000);
@@ -422,7 +398,7 @@ describe('Purchase DHV test coverage', () => {
 
         it('Amount of eth must be greater than 0', async () => {
             await deHiveTokensale.adminSetRates(
-                addressZero, 100000, {from: deployer});
+                addressZero, PRECISION, {from: deployer});
             await timeMachine.advanceTime(
                     PRE_SALE_END - time - 40000);
             
@@ -450,22 +426,23 @@ describe('Purchase DHV test coverage', () => {
         
         it('Cant buy tokens during presale if presale pool is empty', async () => {
             await deHiveTokensale.adminSetRates(
-                addressZero, 100000, {from: deployer});
+                addressZero, PRECISION, {from: deployer});
             // Advance time to pre-sale stage
             await timeMachine.advanceTimeAndBlock(
                 PRE_SALE_START - time + 86400);
             
+            let maxTokens = await deHiveTokensale.PRE_SALE_DHV_POOL();
             // Buy all tokens from presale pool with eth
             await deHiveTokensale.purchaseDHVwithETH({
                 from: user2,
-                value: await web3.utils.toWei('45', 'ether')  
+                value: maxTokens.toString()  
                 });
 
             // Try to buy more tokens with eth
             await truffleAssert.reverts(
                 deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
-                    value: await web3.utils.toWei('1', 'ether')  
+                    value: 1  
                     }),
                 "Not enough DHV in presale pool"
             );
@@ -473,28 +450,30 @@ describe('Purchase DHV test coverage', () => {
 
         it('Cant buy tokens during public sale if public pool is empty', async () => {
             await deHiveTokensale.adminSetRates(
-                addressZero, 100000, {from: deployer});
+                addressZero, PRECISION, {from: deployer});
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
 
             // Advance time to pre-sale stage
             await timeMachine.advanceTimeAndBlock(
                 PRE_SALE_START - time + 86400);
             
+            let maxTokens = await deHiveTokensale.PRE_SALE_DHV_POOL();
             // Buy all tokens tokens from presale pool with eth
             await deHiveTokensale.purchaseDHVwithETH({
                 from: user1,
-                value: await web3.utils.toWei('45', 'ether')  
+                value: maxTokens.toString()
                 });
             
             // Buy all tokens with nux from presale pool
+            maxTokens = await deHiveTokensale.PRE_SALE_DHV_NUX_POOL();
             await testToken.approve(
                 deHiveTokensale.address,
-                BigInt('5000000000000000000'),
+                maxTokens + 1n,
                 {from: deployer}
                 );
             await deHiveTokensale.purchaseDHVwithNUX(
-                BigInt('5000000000000000000'),
+                maxTokens,
                 {from: deployer}
             );
 
@@ -518,19 +497,20 @@ describe('Purchase DHV test coverage', () => {
             await web3.eth.sendTransaction(
                 { to:user2,
                  from:deployer,
-                 value: await web3.utils.toWei('30', 'ether')});
+                 value: maxTokens});
             }
 
+            maxTokens = await deHiveTokensale.PUBLIC_SALE_DHV_POOL();
             await deHiveTokensale.purchaseDHVwithETH({
                     from: user2,
-                    value: await web3.utils.toWei('120', 'ether')  
+                    value: maxTokens  
                         });
             
             // Try to buy more tokens
             await truffleAssert.reverts(
                     deHiveTokensale.purchaseDHVwithETH({
                         from: user2,
-                        value: await web3.utils.toWei('1', 'ether')  
+                        value: 1  
                         }),
                     "Not enough DHV in sale pool"
                 );
@@ -551,7 +531,7 @@ describe('Purchase DHV test coverage', () => {
 
         it('Can buy tokens with NUX only during presale stage', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
             // Advance time to pre-sale stage
             await timeMachine.advanceTimeAndBlock(
                 PRE_SALE_START - time + 86400);
@@ -591,7 +571,7 @@ describe('Purchase DHV test coverage', () => {
 
         it('Cant buy tokens while paused', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
             // Advance time to presale stage
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
@@ -606,7 +586,7 @@ describe('Purchase DHV test coverage', () => {
 
         it('Amount must be greater than 0', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
             // Advance time to presale stage
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
@@ -632,27 +612,28 @@ describe('Purchase DHV test coverage', () => {
 
         it('Cant buy with nux if nux sale pool is empty', async () => {
             await deHiveTokensale.adminSetRates(
-                testTokenAddress, 100000, {from: deployer});
+                testTokenAddress, PRECISION, {from: deployer});
 
             // Advance time to presale stage
             await timeMachine.advanceTime(
                 PRE_SALE_END - time - 40000);
 
             // Buy all token from nux presale pool
+            let maxTokens = await deHiveTokensale.PRE_SALE_DHV_NUX_POOL();
             await testToken.approve(
                 deHiveTokensale.address,
-                BigInt('5001000000000000000'),
+                maxTokens + 1n,
                 {from: deployer}
                 );
             await deHiveTokensale.purchaseDHVwithNUX(
-                BigInt('5000000000000000000'),
+                maxTokens,
                 {from: deployer}
             );
 
             // Try to buy more with nux
             await truffleAssert.reverts(
                 deHiveTokensale.purchaseDHVwithNUX(
-                    BigInt('1000000000000000'),
+                    1,
                     {from: deployer}),
                 "Not enough DHV in NUX pool"
             );

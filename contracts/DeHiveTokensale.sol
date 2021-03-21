@@ -126,7 +126,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         NUXToken = 0x89bD2E7e388fAB44AE88BEf4e1AD12b4F1E0911c;
         vestingStart = 0;
         vestingDuration = 305 * 24 * 60 * 60;
-        maxTokensAmount = 49600 * 10^18; // around 50 ETH 
+        maxTokensAmount = 49600 * (10 ** 18); // around 50 ETH 
     }
 
     /**

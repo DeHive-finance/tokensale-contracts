@@ -46,7 +46,7 @@ module.exports = {
     rinkeby: {
       provider: () => new HDWalletProvider(
         process.env.RINKEBY_PRIVATE_KEY,
-        'https://rinkeby.infura.io/v3/b20c30c9e04c4a6bb1cd728ff589a15e'
+        `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`
       ),
       network_id: 4,
       websockets: false,
@@ -66,7 +66,7 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    timeout: 25000
+    timeout: 250000
   },
 
   // Configure your compilers
