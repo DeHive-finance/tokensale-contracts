@@ -23,8 +23,9 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+coverage.json
 *.lcov
-docs
+docs/Test
 
 # nyc test coverage
 .nyc_output
@@ -43,6 +44,7 @@ build/Release
 build
 flatten
 @openzeppelin
+
 AddressUpgradeable.json
 ERC20.json
 IERC20.json
