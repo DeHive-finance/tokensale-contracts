@@ -4,10 +4,11 @@ pragma solidity ^0.6.12;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TestToken is ERC20, Ownable {
+contract USDTMock is ERC20, Ownable {
 
-    constructor () public ERC20("TestToken", "TT") {
-        _mint(_msgSender(), 10000000 * 10 ** 18);
+    constructor () public ERC20("USDTMock", "USM") {
+        _setupDecimals(6);
+        _mint(_msgSender(), 10000000 * 10 ** 6);
     }
 
     /// @notice Burn method for the exceptional cases

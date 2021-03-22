@@ -4,9 +4,9 @@ pragma solidity ^0.6.12;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TestToken is ERC20, Ownable {
+contract NuxMock is ERC20, Ownable {
 
-    constructor () public ERC20("TestToken", "TT") {
+    constructor () public ERC20("NUXMock", "NXM") {
         _mint(_msgSender(), 10000000 * 10 ** 18);
     }
 
