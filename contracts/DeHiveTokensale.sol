@@ -401,7 +401,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     function _calcPurchaseAmount(address _token, uint256 _amount) private view returns (uint256) {
         uint256 purchaseAmount = _amount.mul(rates[_token]).div(PRECISION);
         require(purchaseAmount > 0, "Rates not set");
-        require(purchaseAmount <= maxTokensAmount, "Maximum allowed exceeded");
+        require(purchaseAmount.add(purchased[msg.sender]) <= maxTokensAmount, "Maximum allowed exceeded");
         return purchaseAmount;
     }
 
@@ -413,7 +413,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     function _calcEthPurchaseAmount(uint256 _amount) private view returns (uint256) {
         uint256 purchaseAmount = _amount.mul(ETHRate).div(PRECISION);
         require(purchaseAmount > 0, "Rates not set");
-        require(purchaseAmount <= maxTokensAmount, "Maximum allowed exceeded");
+        require(purchaseAmount.add(purchased[msg.sender]) <= maxTokensAmount, "Maximum allowed exceeded");
         return purchaseAmount;
     }
 

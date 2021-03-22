@@ -37,7 +37,7 @@ describe('Gas estimate', () => {
     dhvToken = await DHVToken.new({ from: deployer });
 
     testTokenAddress = testToken.address;
-    deHiveTokensale = await deployProxy(DeHiveTokensale,
+    deHiveTokensale = await deployProxy(DeHiveTokensaleMock,
       [testToken.address,
         testToken.address,
         testToken.address,
