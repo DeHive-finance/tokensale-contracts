@@ -5,7 +5,7 @@ const { expect } = require('chai');
 const timeMachine = require('ganache-time-traveler');
 const truffleAssert = require('truffle-assertions');
 
-const DeHiveTokensale = artifacts.require('DeHiveTokensaleMock');
+const DeHiveTokensale = artifacts.require('DeHiveTokensale');
 const TestToken = artifacts.require('TestToken');
 const DHVToken = artifacts.require('DHVToken');
 
@@ -37,10 +37,8 @@ describe('Gas estimate', () => {
     dhvToken = await DHVToken.new({ from: deployer });
 
     testTokenAddress = testToken.address;
-    deHiveTokensale = await deployProxy(DeHiveTokensaleMock,
-      [testToken.address,
-        testToken.address,
-        testToken.address,
+    deHiveTokensale = await deployProxy(DeHiveTokensale,
+      [
         treasury,
         dhvToken.address],
       { from: deployer });
