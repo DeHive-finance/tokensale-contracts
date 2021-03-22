@@ -34,7 +34,6 @@ describe('Test receive() and purchaseDHVwithERC20()', () => {
 
     testToken = await TestToken.new({ from: user1 });
     dhvToken = await DHVToken.new({ from: deployer });
-
     deHiveTokensale = await deployProxy(DeHiveTokensale,
       [testToken.address,
         testToken.address,

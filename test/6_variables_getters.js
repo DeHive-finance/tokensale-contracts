@@ -83,6 +83,9 @@ describe('Test getters for public variables', () => {
         .to.equal(305 * 24 * 60 * 60);
       expect((await deHiveTokensale.DHVToken()).toString())
         .to.equal(dhvToken.address);
+        expect((await deHiveTokensale.maxTokensAmount()).toString()).to.equal(
+          (await deHiveTokensale.PUBLIC_SALE_DHV_POOL()).toString()
+        );
       // ETHRate and rates(mapping)
       expect((await deHiveTokensale.ETHRate()).toNumber())
         .to.equal(0);

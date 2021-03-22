@@ -52,12 +52,12 @@ describe('Claim from vesting functionality coverage', () => {
       // Create a snapshot
       const snapshot = await timeMachine.takeSnapshot();
       snapshotId = snapshot['result'];
-      await deHiveTokensale.adminSetVestingStart(1625097600);
     });
 
     afterEach(async() => await timeMachine.revertToSnapshot(snapshotId));
 
     it('Should claim some vested tokens during vest period', async() => {
+      await deHiveTokensale.adminSetVestingStart(1625097600);
       // Buy tokens during sale stages
       await deHiveTokensale.adminSetRates(
         testTokenAddress, PRECISION, { from: deployer });
@@ -100,6 +100,7 @@ describe('Claim from vesting functionality coverage', () => {
     });
 
     it('Cant claim before vesting period', async() => {
+      await deHiveTokensale.adminSetVestingStart(1625097600);
       // Buy tokens during sale stages
       await deHiveTokensale.adminSetRates(
         testTokenAddress, PRECISION, { from: deployer });
@@ -133,6 +134,7 @@ describe('Claim from vesting functionality coverage', () => {
     });
 
     it('Cant claim tokens if non are purchased', async() => {
+      await deHiveTokensale.adminSetVestingStart(1625097600);
       // Advance time to vesting period
       await timeMachine.advanceTime(VESTING_START - time + 86400);
       // Transfer DHV tokens to TokenSale
@@ -150,6 +152,7 @@ describe('Claim from vesting functionality coverage', () => {
     });
 
     it('Should claim all tokens after vesting period', async() => {
+      await deHiveTokensale.adminSetVestingStart(1625097600);
       // Buy tokens during sale stages
       await deHiveTokensale.adminSetRates(
         testTokenAddress, PRECISION, { from: deployer });
@@ -190,6 +193,7 @@ describe('Claim from vesting functionality coverage', () => {
     });
 
     it('Should claim exactly 1/305 of vesting', async() => {
+      await deHiveTokensale.adminSetVestingStart(1625097600);
       // Buy tokens during sale stages
       await deHiveTokensale.adminSetRates(
         testTokenAddress, PRECISION, { from: deployer });
@@ -228,6 +232,7 @@ describe('Claim from vesting functionality coverage', () => {
     });
 
     it('Cant claim same tokens twice', async() => {
+      await deHiveTokensale.adminSetVestingStart(1625097600);
       // Buy tokens during sale stages
       await deHiveTokensale.adminSetRates(
         testTokenAddress, PRECISION, { from: deployer });
@@ -282,6 +287,43 @@ describe('Claim from vesting functionality coverage', () => {
         .to.equal(claimedAmount);
       expect((await deHiveTokensale.claimed(user1)).toNumber())
         .to.equal(claimedAmount);
+    });
+
+    it('Cant claim tokens before vesting is set', async () => {
+       // Buy tokens during sale stages
+       await deHiveTokensale.adminSetRates(
+        testTokenAddress, PRECISION, { from: deployer });
+      await timeMachine.advanceTimeAndBlock(
+        PUBLIC_SALE_START - time + 86400); // Get April 15
+      await testToken.approve(
+        deHiveTokensale.address,
+        BigInt('10000000000000000000'),
+        { from: user1 }
+      );
+      await deHiveTokensale.purchaseDHVwithERC20(
+        testToken.address,
+        BigInt('127000'),
+        { from: user1 }
+      );
+
+      // Transfer DHV tokens to TokenSale
+      await dhvToken.mint(
+        deHiveTokensale.address,
+        BigInt('10000000000000000000000000'),
+        { from: deployer }
+      );
+      // Set vestingStart + one day
+      const tmp_blocknum = await web3.eth.getBlockNumber();
+      const tmp_block = await web3.eth.getBlock(tmp_blocknum);
+      const tmp_time = tmp_block.timestamp;
+
+      await timeMachine.advanceTimeAndBlock(
+        VESTING_START - tmp_time + 86400);
+      // Try to claim tokens
+      await truffleAssert.reverts(
+        deHiveTokensale.claim({from: user1}),
+        "Vesting start is not set"
+      );
     });
   });
 });
