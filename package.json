@@ -16,6 +16,7 @@
     "dev:flatten": "sh ./scripts/run-flattener.sh",
     "deploy:dhv": "npm run clear && npx truffle migrate --migrations_directory './migrations/dhv/'",
     "deploy:test": "npm run clear && npx truffle migrate --migrations_directory './migrations/testnet/' --network rinkeby",
+    "deploy:sale": "npm run clear && npx truffle migrate --migrations_directory './migrations/mainnet/' --network main",
     "postinstall": "npm run compile && npm run generate-abi"
   },
   "repository": {

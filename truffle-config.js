@@ -57,8 +57,8 @@ module.exports = {
         `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`
       ),
       network_id: 1,
-      gas: 12000000,
-      gasPrice: 10000000000
+      gas: 5200000,
+      gasPrice: 150000000000
     }
   },
 

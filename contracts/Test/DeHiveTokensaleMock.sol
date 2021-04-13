@@ -54,6 +54,10 @@ contract DeHiveTokensaleMock is DeHiveTokensale {
         vestingStart = _vestingStart;
     }
 
+    function adminAddPurchase(address _receiver, uint256 _amount) override external {
+        purchased[_receiver] = purchased[_receiver].add(_amount);
+    }
+
     function _isPreSale() override internal view returns (bool) {
         return (block.timestamp >= preSaleStart && block.timestamp < preSaleEnd);
     }

@@ -66,6 +66,8 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     mapping (address => uint256) public rates;
 
     address private _treasury;
+
+    mapping (address => uint256) public purchasedPublic;
     
     /***
      * MODIFIERS
@@ -227,8 +229,8 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
     function purchaseDHVwithERC20(address ERC20token, uint256 ERC20amount) external onlySale supportedCoin(ERC20token) whenNotPaused correctGas {
         require(ERC20amount > 0, "Zero amount");
         uint256 purchaseAmount = _calcPurchaseAmount(ERC20token, ERC20amount);
-        require(purchaseAmount.add(purchased[msg.sender]) <= maxTokensAmount, "Maximum allowed exceeded");
 
+        _checkCapReached(purchaseAmount);
         
         if (_isPreSale()) {
             require(purchasedPreSale.add(purchaseAmount) <= PRE_SALE_DHV_POOL, "Not enough DHV in presale pool");
@@ -236,6 +238,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         } else {
             require(purchaseAmount <= publicSaleAvailableDHV(), "Not enough DHV in sale pool");
             purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
+            purchasedPublic[_msgSender()] = purchasedPublic[_msgSender()].add(purchaseAmount);
         }
             
         purchased[_msgSender()] = purchased[_msgSender()].add(purchaseAmount);
@@ -273,7 +276,8 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
 
     function _purchaseDHVwithETH() correctGas private {
         uint256 purchaseAmount = _calcEthPurchaseAmount(msg.value);
-        require(purchaseAmount.add(purchased[msg.sender]) <= maxTokensAmount, "Maximum allowed exceeded");
+        
+        _checkCapReached(purchaseAmount);
 
         if (_isPreSale()) {
             require(purchasedPreSale.add(purchaseAmount) <= PRE_SALE_DHV_POOL, "Not enough DHV in presale pool");
@@ -281,6 +285,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         } else {
             require(purchaseAmount <= publicSaleAvailableDHV(), "Not enough DHV in sale pool");
             purchasedPublicSale = purchasedPublicSale.add(purchaseAmount);
+            purchasedPublic[_msgSender()] = purchasedPublic[_msgSender()].add(purchaseAmount);
         }
 
         purchased[_msgSender()] = purchased[_msgSender()].add(purchaseAmount);
@@ -296,9 +301,7 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
      * @return The amount of the token released.
      */
     function publicSaleAvailableDHV() public view returns(uint256) {
-        return (PUBLIC_SALE_DHV_POOL +
-               PRE_SALE_DHV_POOL.sub(purchasedPreSale) +
-               PRE_SALE_DHV_NUX_POOL.sub(purchasedWithNUX)).sub(purchasedPublicSale);
+        return PUBLIC_SALE_DHV_POOL.sub(purchasedPublicSale);
     }
 
 
@@ -450,6 +453,19 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         uint256 purchaseAmount = _amount.mul(ETHRate).div(PRECISION);
         require(purchaseAmount > 0, "Rates not set");
         return purchaseAmount;
+    }
+
+    /**
+     * @dev Checks if currently purchased amount does not reach cap per wallet.
+     * @param purchaseAmount DHV tokens currently purchased
+     */
+    function _checkCapReached(uint256 purchaseAmount) private view {
+        if (_isPreSale()) {
+            require(purchaseAmount.add(purchased[msg.sender]) <= maxTokensAmount, "Maximum allowed exceeded");
+        }
+        else {
+            require(purchaseAmount.add(purchasedPublic[msg.sender]) <= maxTokensAmount, "Maximum allowed exceeded");   
+        }
     }
 
 
