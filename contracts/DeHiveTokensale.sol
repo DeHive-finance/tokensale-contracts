@@ -210,6 +210,10 @@ contract DeHiveTokensale is OwnableUpgradeable, PausableUpgradeable {
         _unpause();
     }
 
+    function adminAddPurchase(address _receiver, uint256 _amount) virtual external onlyOwner {
+        purchased[_receiver] = purchased[_receiver].add(_amount);
+    }
+
     /***
      * PURCHASE FUNCTIONS
      ***/
